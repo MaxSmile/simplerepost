@@ -1,6 +1,7 @@
 package ch.dbrgn.android.simplerepost;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Environment;
 import android.support.v7.app.ActionBarActivity;
@@ -17,9 +18,19 @@ public class MainActivity extends ActionBarActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-    }
 
+        // Load shared preferences
+        SharedPreferences settings = getSharedPreferences(Config.SHARED_PREFS_NAME, MODE_PRIVATE);
+        String accessToken = settings.getString("AccessToken", null);
+
+        // If login is needed, proceed to login activity
+        if (accessToken == null) {
+            Intent intent = new Intent(this, LoginActivity.class);
+            startActivity(intent);
+        } else {
+            setContentView(R.layout.activity_main);
+        }
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
