@@ -45,6 +45,7 @@ public class LoginActivity extends ActionBarActivity {
         // Don't offer to save password
         WebSettings webSettings = webView.getSettings();
         webSettings.setSaveFormData(false);
+        webSettings.setSavePassword(false);
 
         // Load login URL
         webView.loadUrl(AUTH_URL);
