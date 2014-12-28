@@ -3,7 +3,7 @@
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
         <!-- colorPrimary is used for the default action bar background -->
-        <item name="colorPrimary">@color/blue_light</item>
+        <item name="colorPrimary">@color/blue_instagram</item>
 
         <!-- colorPrimaryDark is used for the status bar -->
         <item name="colorPrimaryDark">@color/blue_dark</item>
