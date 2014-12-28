@@ -37,7 +37,7 @@ import java.net.URISyntaxException;
 public class LoginActivity extends ActionBarActivity {
 
     // Log tag
-    private static final String LOG_TAG = LoginActivity.class.getName();
+    public static final String LOG_TAG = LoginActivity.class.getName();
 
     // URL constants
     private static final String AUTH_URL = "https://instagram.com/oauth/authorize/"

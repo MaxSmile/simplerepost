@@ -34,7 +34,8 @@ import java.io.File;
 public class MainActivity extends ActionBarActivity {
 
     // Log tag
-    private static final String LOG_TAG = MainActivity.class.getName();
+    public static final String LOG_TAG = MainActivity.class.getName();
+    private String mAccessToken;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,12 +43,14 @@ public class MainActivity extends ActionBarActivity {
 
         // Load shared preferences
         SharedPreferences settings = getSharedPreferences(Config.SHARED_PREFS_NAME, MODE_PRIVATE);
-        String accessToken = settings.getString("AccessToken", null);
+        this.mAccessToken = settings.getString("AccessToken", null);
 
         // If login is needed, proceed to login activity
-        if (accessToken == null) {
+        if (mAccessToken == null) {
+            Log.i(LOG_TAG, "No access token found, launch login activity...");
             this.launchLoginActivity();
         } else {
+            Log.i(LOG_TAG, "Access token found.");
             setContentView(R.layout.activity_main);
         }
     }

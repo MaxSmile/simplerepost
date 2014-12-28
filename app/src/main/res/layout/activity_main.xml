@@ -10,14 +10,24 @@
         android:id="@+id/welcome_text"
         android:text="@string/welcome_msg"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:textStyle="bold"
+        android:textSize="16sp" />
+
+    <TextView
+        android:id="@+id/info_text"
+        android:text="@string/info_msg"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/welcome_text"
+        android:layout_marginTop="16dp"/>
 
     <EditText
         android:id="@+id/url_input"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/welcome_text"
-        android:layout_marginTop="20dp"
+        android:layout_below="@id/info_text"
+        android:layout_marginTop="32dp"
         android:hint="Paste URL here" />
 
     <Button
@@ -25,7 +35,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/url_input"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="16dp"
         android:text="@string/repost_button_text"
         android:onClick="repostToInstagram" />
 
