@@ -6,6 +6,7 @@ import android.net.Uri;
 import android.os.Environment;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -14,6 +15,9 @@ import java.io.File;
 
 
 public class MainActivity extends ActionBarActivity {
+
+    // Log tag
+    private static final String LOG_TAG = MainActivity.class.getName();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,8 +29,7 @@ public class MainActivity extends ActionBarActivity {
 
         // If login is needed, proceed to login activity
         if (accessToken == null) {
-            Intent intent = new Intent(this, LoginActivity.class);
-            startActivity(intent);
+            this.launchLoginActivity();
         } else {
             setContentView(R.layout.activity_main);
         }
@@ -49,6 +52,8 @@ public class MainActivity extends ActionBarActivity {
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             return true;
+        } else if (id == R.id.action_logout) {
+            this.logout();
         }
 
         return super.onOptionsItemSelected(item);
@@ -81,4 +86,23 @@ public class MainActivity extends ActionBarActivity {
         // Broadcast the Intent.
         startActivity(Intent.createChooser(share, "Share to"));
     }
+
+    private void logout() {
+        Log.i(LOG_TAG, "Logging out...");
+        // Clear access token
+        // TODO: Refactor this out into an auth class.
+        SharedPreferences settings = getSharedPreferences(Config.SHARED_PREFS_NAME, MODE_PRIVATE);
+        SharedPreferences.Editor editor = settings.edit();
+        editor.remove("AccessToken");
+        editor.commit();
+
+        // Start login activity
+        this.launchLoginActivity();
+    }
+
+    private void launchLoginActivity() {
+        Intent intent = new Intent(this, LoginActivity.class);
+        startActivity(intent);
+    }
+
 }

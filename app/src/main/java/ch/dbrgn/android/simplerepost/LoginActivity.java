@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
+import android.webkit.CookieManager;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -37,6 +38,9 @@ public class LoginActivity extends ActionBarActivity {
 
         // Set custom WebViewClient
         webView.setWebViewClient(getWebViewClient());
+
+        // Clear all cookies
+        this.clearAllCookies(webView);
 
         // Don't offer to save password
         WebSettings webSettings = webView.getSettings();
@@ -82,13 +86,24 @@ public class LoginActivity extends ActionBarActivity {
     }
 
     /**
+     * Clear cache and cookies of the specified webview.
+     */
+    private void clearAllCookies(WebView webView) {
+        Log.i(LOG_TAG, "Clearing all cookies.");
+        webView.clearCache(true);
+        webView.clearHistory();
+        CookieManager cookieManager = CookieManager.getInstance();
+        cookieManager.removeAllCookie();
+        cookieManager.removeSessionCookie();
+    }
+
+    /**
      * Parses the redirect URI fragment and returns the access token.
      */
     private String parseFragment(String fragment) {
         final String[] fragmentParts = fragment.split("=");
         assert fragmentParts.length == 2;
         final String accessToken = fragmentParts[1];
-        Log.d(LOG_TAG, "Access token is " + accessToken);
         return accessToken;
     }
 
