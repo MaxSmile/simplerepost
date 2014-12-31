@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package ch.dbrgn.android.simplerepost;
+package ch.dbrgn.android.simplerepost.activities;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -29,6 +29,9 @@ import android.webkit.WebViewClient;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+
+import ch.dbrgn.android.simplerepost.Config;
+import ch.dbrgn.android.simplerepost.R;
 
 
 /**

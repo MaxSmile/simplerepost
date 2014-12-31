@@ -1,7 +1,8 @@
 <resources>
     <string name="title_activity_main">Simple Repost</string>
-    <string name="welcome_msg">Welcome!</string>
-    <string name="welcome_msg_personalized">Welcome, %s!</string>
+    <string name="welcome_text">Welcome!</string>
+    <string name="welcome_text_personalized">Welcome, %s!</string>
     <string name="info_msg">This app lets you repost an Instagram post by URL.</string>
     <string name="repost_button_text">Repost</string>
+    <string name="place_url_hint">Paste URL here</string>
 </resources>
