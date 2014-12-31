@@ -10,6 +10,12 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="ch.dbrgn.android.simplerepost.activities.LoginActivity">
 
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:text="@string/login_text" />
+
     <WebView
         android:id="@+id/login_webview"
         android:layout_width="match_parent"
