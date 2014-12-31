@@ -17,8 +17,10 @@
  **/
 package ch.dbrgn.android.simplerepost.activities;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -27,6 +29,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -36,15 +39,25 @@ import com.squareup.otto.Subscribe;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import ch.dbrgn.android.simplerepost.BusProvider;
 import ch.dbrgn.android.simplerepost.Config;
 import ch.dbrgn.android.simplerepost.R;
 import ch.dbrgn.android.simplerepost.api.ApiFactory;
 import ch.dbrgn.android.simplerepost.events.ApiErrorEvent;
+import ch.dbrgn.android.simplerepost.events.DownloadBitmapEvent;
+import ch.dbrgn.android.simplerepost.events.DownloadErrorEvent;
+import ch.dbrgn.android.simplerepost.events.DownloadedBitmapEvent;
 import ch.dbrgn.android.simplerepost.events.LoadCurrentUserEvent;
+import ch.dbrgn.android.simplerepost.events.LoadMediaPreviewEvent;
 import ch.dbrgn.android.simplerepost.events.LoadedCurrentUserEvent;
+import ch.dbrgn.android.simplerepost.api.MediaAccessType;
+import ch.dbrgn.android.simplerepost.events.LoadedMediaPreviewEvent;
 import ch.dbrgn.android.simplerepost.services.CurrentUserService;
+import ch.dbrgn.android.simplerepost.services.FileDownloadService;
+import ch.dbrgn.android.simplerepost.services.MediaService;
 import ch.dbrgn.android.simplerepost.services.Service;
 
 
@@ -57,6 +70,7 @@ public class MainActivity extends ActionBarActivity {
     private String mAccessToken; // Use getAccessToken()
     private ImageView mPreviewImageView;
     private ArrayList<Service> mServices = new ArrayList<>();
+    private ProgressDialog mPreviewProgressDialog;
 
 
     /*** Lifecycle methods ***/
@@ -71,11 +85,12 @@ public class MainActivity extends ActionBarActivity {
         }
 
         // Assign views to members
-        mPreviewImageView = (ImageView)findViewById(R.id.image_preview);
+        mPreviewImageView = (ImageView)findViewById(R.id.media_preview);
 
         // Set up services
-        final CurrentUserService currentUserService = new CurrentUserService(ApiFactory.getUserApi(), BusProvider.getInstance());
-        mServices.add(currentUserService);
+        mServices.add(new CurrentUserService(ApiFactory.getUserApi(), BusProvider.getInstance()));
+        mServices.add(new MediaService(ApiFactory.getMediaApi(), BusProvider.getInstance()));
+        mServices.add(new FileDownloadService(BusProvider.getInstance()));
     }
 
     @Override
@@ -141,7 +156,31 @@ public class MainActivity extends ActionBarActivity {
 
     /*** UI event handlers ***/
 
-    public void repostToInstagram(View view) {
+    public void eventPreview(View view) {
+        // TODO: Input validation
+
+        EditText urlInputView = (EditText)findViewById(R.id.url_input);
+        final String text = urlInputView.getText().toString();
+
+        final String shortcode = parseShortcodeUrl(text);
+        if (shortcode == null || shortcode == "") {
+            // TOOD: handle, highlight input field with validation error
+            return;
+        }
+
+        BusProvider.getInstance().post(
+                new LoadMediaPreviewEvent(
+                        getAccessToken(), MediaAccessType.SHORTCODE, shortcode
+                )
+        );
+
+        // Show progress dialog
+        mPreviewProgressDialog = new ProgressDialog(this);
+        mPreviewProgressDialog.setMessage(getString(R.string.loading_preview));
+        mPreviewProgressDialog.show();
+    }
+
+    public void eventRepost(View view) {
         final String type = "image/*";
         final String filename = "/myPhoto.jpg";
         final String mediaPath = Environment.getExternalStorageDirectory() + filename;
@@ -153,15 +192,8 @@ public class MainActivity extends ActionBarActivity {
 
     /*** Bus event handlers ***/
 
-/*    @Subscribe
-    public void onPreviewImageLoaded(PreviewImageLoadedEvent event) {
-        Uri imageURI = event.getImageURI();
-        mPreviewImageView.setImageURI(imageURI);
-    }
-*/
-
     @Subscribe
-    public void onLoadedCurrentUserEvent(LoadedCurrentUserEvent event) {
+    public void onLoadedCurrentUser(LoadedCurrentUserEvent event) {
         final String username = event.getUser().getFullNameOrUsername();
         final String welcomeText = getString(R.string.welcome_text_personalized, username);
 
@@ -170,12 +202,44 @@ public class MainActivity extends ActionBarActivity {
     }
 
     @Subscribe
+    public void onLoadedMediaPreview(LoadedMediaPreviewEvent event) {
+        String imageUrl = event.getImages().getStandardResolution().getUrl();
+
+        Log.d(LOG_TAG, "Image URL is " + imageUrl);
+
+        BusProvider.getInstance().post(new DownloadBitmapEvent(imageUrl));
+    }
+
+    @Subscribe
+    public void onDownloadedBitmap(DownloadedBitmapEvent event) {
+        // Hide progress dialog
+        mPreviewProgressDialog.dismiss();
+
+        // Show bitmap
+        final Bitmap bitmap = event.getBitmap();
+        if (bitmap != null) {
+            mPreviewImageView.setImageBitmap(bitmap);
+        } else {
+            Log.d(LOG_TAG, "Bitmap is null");
+        }
+    }
+
+    @Subscribe
     public void onApiError(ApiErrorEvent event) {
         final String message = "Something went wrong, please try again.";
         final Toast toast = Toast.makeText(this, message, Toast.LENGTH_SHORT);
         toast.show();
-        Log.e(LOG_TAG, event.getErrorMessage());
+        Log.e(LOG_TAG, "ApiErrorEvent: " + event.getErrorMessage());
     }
+
+    @Subscribe
+    public void onDownloadError(DownloadErrorEvent event) {
+        final String message = "Something went wrong, please try again.";
+        final Toast toast = Toast.makeText(this, message, Toast.LENGTH_SHORT);
+        toast.show();
+        Log.e(LOG_TAG, "DownloadErrorEvent: " + event.getErrorMessage());
+    }
+
 
     /*** Private helper methods ***/
 
@@ -196,6 +260,18 @@ public class MainActivity extends ActionBarActivity {
 
         // Broadcast the Intent.
         startActivity(Intent.createChooser(share, "Share to"));
+    }
+
+    /**
+     * Parse the shortcode out of an Instagram share URL.
+     */
+    private String parseShortcodeUrl(String text) {
+        Pattern pattern = Pattern.compile("^(?:https?://)?instagram.com/p/([a-zA-Z0-9]+)/?.*");
+        Matcher matcher = pattern.matcher(text);
+        if (matcher.matches()) {
+            return matcher.group(1);
+        }
+        return null;
     }
 
     /**

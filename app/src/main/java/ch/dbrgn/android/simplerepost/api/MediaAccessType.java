@@ -19,20 +19,9 @@
 package ch.dbrgn.android.simplerepost.api;
 
 /**
- * A static class that creates and returns API class instances via the static `getXxxApi()` methods.
+ * Media can be accessed via ID or shortcode.
  */
-public class ApiFactory {
-
-    private ApiFactory() {
-        // No instances
-    }
-
-    public static UserApi getUserApi() {
-        return RestAdapterFactory.build().create(UserApi.class);
-    }
-
-    public static MediaApi getMediaApi() {
-        return RestAdapterFactory.build().create(MediaApi.class);
-    }
-
+public enum MediaAccessType {
+    ID,
+    SHORTCODE
 }

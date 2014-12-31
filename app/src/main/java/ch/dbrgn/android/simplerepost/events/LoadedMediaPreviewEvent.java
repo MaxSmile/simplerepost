@@ -16,23 +16,20 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
-package ch.dbrgn.android.simplerepost.api;
+package ch.dbrgn.android.simplerepost.events;
 
-/**
- * A static class that creates and returns API class instances via the static `getXxxApi()` methods.
- */
-public class ApiFactory {
+import ch.dbrgn.android.simplerepost.models.Images;
 
-    private ApiFactory() {
-        // No instances
+public class LoadedMediaPreviewEvent {
+
+    private final Images images;
+
+    public LoadedMediaPreviewEvent(Images images) {
+        this.images = images;
     }
 
-    public static UserApi getUserApi() {
-        return RestAdapterFactory.build().create(UserApi.class);
-    }
-
-    public static MediaApi getMediaApi() {
-        return RestAdapterFactory.build().create(MediaApi.class);
+    public Images getImages() {
+        return images;
     }
 
 }

@@ -18,21 +18,27 @@
 
 package ch.dbrgn.android.simplerepost.api;
 
-/**
- * A static class that creates and returns API class instances via the static `getXxxApi()` methods.
- */
-public class ApiFactory {
+import ch.dbrgn.android.simplerepost.models.MediaResponse;
+import ch.dbrgn.android.simplerepost.models.Profile;
+import retrofit.Callback;
+import retrofit.http.GET;
+import retrofit.http.Path;
+import retrofit.http.Query;
 
-    private ApiFactory() {
-        // No instances
-    }
+public interface MediaApi {
 
-    public static UserApi getUserApi() {
-        return RestAdapterFactory.build().create(UserApi.class);
-    }
+    @GET("/media/shortcode/{media_shortcode}")
+    void getMediaByShortcode(
+            @Path("media_shortcode") String shortcode,
+            @Query("access_token") String access_token,
+            Callback<MediaResponse> callback
+    );
 
-    public static MediaApi getMediaApi() {
-        return RestAdapterFactory.build().create(MediaApi.class);
-    }
+    @GET("/media/shortcode/{media_id}")
+    void getMedia(
+            @Path("media_id") String id,
+            @Query("access_token") String access_token,
+            Callback<MediaResponse> callback
+    );
 
 }
