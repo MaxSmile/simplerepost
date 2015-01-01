@@ -1,6 +1,6 @@
 /**
  * SimpleRepost -- A simple Instagram reposting Android app.
- * Copyright (C) 2014-2014 Danilo Bargen
+ * Copyright (C) 2014-2015 Danilo Bargen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,32 +16,26 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
-package ch.dbrgn.android.simplerepost.events;
+package ch.dbrgn.android.simplerepost.models;
 
-import ch.dbrgn.android.simplerepost.api.MediaAccessType;
+import android.graphics.Bitmap;
 
-public class LoadMediaPreviewEvent {
+public class ImageBitmap {
 
-    private final String accessToken;
-    private final MediaAccessType idType;
-    private final String idValue;
+    private final Bitmap bitmap;
+    private final String filename;
 
-    public LoadMediaPreviewEvent(String accessToken, MediaAccessType idType, String idValue) {
-        this.accessToken = accessToken;
-        this.idType = idType;
-        this.idValue = idValue;
+    public ImageBitmap(Bitmap bitmap, String filename) {
+        this.bitmap = bitmap;
+        this.filename = filename;
     }
 
-    public String getAccessToken() {
-        return accessToken;
+    public Bitmap getBitmap() {
+        return bitmap;
     }
 
-    public MediaAccessType getIdType() {
-        return idType;
-    }
-
-    public String getIdValue() {
-        return idValue;
+    public String getFilename() {
+        return filename;
     }
 
 }

@@ -1,6 +1,6 @@
 /**
  * SimpleRepost -- A simple Instagram reposting Android app.
- * Copyright (C) 2014--2014 Danilo Bargen
+ * Copyright (C) 2014-2014 Danilo Bargen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -41,6 +41,7 @@ import ch.dbrgn.android.simplerepost.events.DownloadErrorEvent;
 import ch.dbrgn.android.simplerepost.events.DownloadedBitmapEvent;
 import ch.dbrgn.android.simplerepost.events.LoadMediaPreviewEvent;
 import ch.dbrgn.android.simplerepost.events.LoadedMediaPreviewEvent;
+import ch.dbrgn.android.simplerepost.models.ImageBitmap;
 import ch.dbrgn.android.simplerepost.models.MediaResponse;
 import retrofit.Callback;
 import retrofit.RetrofitError;
@@ -66,21 +67,21 @@ public class FileDownloadService implements Service {
     /**
      * Async task that downloads the bitmap in a background thread.
      */
-    private class DownloadBitmapTask extends AsyncTask<String, Void, Bitmap> {
+    private class DownloadBitmapTask extends AsyncTask<String, Void, ImageBitmap> {
 
         @Override
-        protected Bitmap doInBackground(String... params) {
+        protected ImageBitmap doInBackground(String... params) {
             final String url = params[0];
             return downloadBitmap(url);
 
         }
 
         @Override
-        protected void onPostExecute(Bitmap bitmap) {
-            super.onPostExecute(bitmap);
+        protected void onPostExecute(ImageBitmap imageBitmap) {
+            super.onPostExecute(imageBitmap);
 
-            if (bitmap != null) {
-                mBus.post(new DownloadedBitmapEvent(bitmap));
+            if (imageBitmap != null) {
+                mBus.post(new DownloadedBitmapEvent(imageBitmap));
             }
         }
 
@@ -94,9 +95,13 @@ public class FileDownloadService implements Service {
      *
      * You should probably run this code in a background thread!
      */
-    private Bitmap downloadBitmap(String url) {
+    private ImageBitmap downloadBitmap(String url) {
         final DefaultHttpClient client = new DefaultHttpClient();
         Bitmap bitmap = null;
+
+        // Parse filename out of URL
+        final String[] parts = url.split("/");
+        final String filename = parts[parts.length - 1];
 
         final HttpGet getRequest = new HttpGet(url);
         try {
@@ -139,7 +144,7 @@ public class FileDownloadService implements Service {
             mBus.post(new DownloadErrorEvent(message));
         }
 
-        return bitmap;
+        return new ImageBitmap(bitmap, filename);
     }
 
 }

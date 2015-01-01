@@ -18,30 +18,31 @@
 package ch.dbrgn.android.simplerepost.activities;
 
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
 
-import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOError;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import ch.dbrgn.android.simplerepost.AccessTokenProvider;
+import ch.dbrgn.android.simplerepost.AuthHelper;
 import ch.dbrgn.android.simplerepost.BusProvider;
 import ch.dbrgn.android.simplerepost.R;
 import ch.dbrgn.android.simplerepost.api.ApiFactory;
@@ -54,6 +55,7 @@ import ch.dbrgn.android.simplerepost.events.LoadCurrentUserEvent;
 import ch.dbrgn.android.simplerepost.events.LoadMediaPreviewEvent;
 import ch.dbrgn.android.simplerepost.events.LoadedCurrentUserEvent;
 import ch.dbrgn.android.simplerepost.events.LoadedMediaPreviewEvent;
+import ch.dbrgn.android.simplerepost.models.ImageBitmap;
 import ch.dbrgn.android.simplerepost.services.CurrentUserService;
 import ch.dbrgn.android.simplerepost.services.FileDownloadService;
 import ch.dbrgn.android.simplerepost.services.MediaService;
@@ -66,7 +68,6 @@ public class MainActivity extends ActionBarActivity {
     public static final String LOG_TAG = MainActivity.class.getName();
 
     // Private members
-    private ImageView mPreviewImageView;
     private ArrayList<Service> mServices = new ArrayList<>();
     private ProgressDialog mPreviewProgressDialog;
 
@@ -78,12 +79,10 @@ public class MainActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
 
         // Access token must be available for this activity to work
-        if (AccessTokenProvider.getToken(this) != null) {
+        // This is needed because this is the main activity
+        if (AuthHelper.getToken(this) != null) {
             setContentView(R.layout.activity_main);
         }
-
-        // Assign views to members
-        mPreviewImageView = (ImageView)findViewById(R.id.media_preview);
 
         // Set up services
         mServices.add(new CurrentUserService(ApiFactory.getUserApi(), BusProvider.getInstance()));
@@ -106,7 +105,7 @@ public class MainActivity extends ActionBarActivity {
         bus.register(this);
 
         // Update user info
-        bus.post(new LoadCurrentUserEvent(AccessTokenProvider.getToken(this)));
+        bus.post(new LoadCurrentUserEvent(AuthHelper.getToken(this)));
     }
 
     @Override
@@ -141,11 +140,11 @@ public class MainActivity extends ActionBarActivity {
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             return true;
         } else if (id == R.id.action_logout) {
-            logout();
+            Log.i(LOG_TAG, "Logging out...");
+            AuthHelper.logout(this);
         }
 
         return super.onOptionsItemSelected(item);
@@ -161,14 +160,14 @@ public class MainActivity extends ActionBarActivity {
         final String text = urlInputView.getText().toString();
 
         final String shortcode = parseShortcodeUrl(text);
-        if (shortcode == null || shortcode == "") {
+        if (shortcode == null || shortcode.equals("")) {
             // TOOD: handle, highlight input field with validation error
             return;
         }
 
         BusProvider.getInstance().post(
                 new LoadMediaPreviewEvent(
-                        AccessTokenProvider.getToken(this), MediaAccessType.SHORTCODE, shortcode
+                        AuthHelper.getToken(this), MediaAccessType.SHORTCODE, shortcode
                 )
         );
 
@@ -176,15 +175,6 @@ public class MainActivity extends ActionBarActivity {
         mPreviewProgressDialog = new ProgressDialog(this);
         mPreviewProgressDialog.setMessage(getString(R.string.loading_preview));
         mPreviewProgressDialog.show();
-    }
-
-    public void eventRepost(View view) {
-        final String type = "image/*";
-        final String filename = "/myPhoto.jpg";
-        final String mediaPath = Environment.getExternalStorageDirectory() + filename;
-        final String captionText = "<< media caption >>";
-
-        createInstagramIntent(type, mediaPath, captionText);
     }
 
 
@@ -213,13 +203,39 @@ public class MainActivity extends ActionBarActivity {
         // Hide progress dialog
         mPreviewProgressDialog.dismiss();
 
-        // Show bitmap
+        // Verify bitmap was sent
         final Bitmap bitmap = event.getBitmap();
-        if (bitmap != null) {
-            mPreviewImageView.setImageBitmap(bitmap);
-        } else {
-            Log.d(LOG_TAG, "Bitmap is null");
+        if (bitmap == null) {
+            Log.e(LOG_TAG, "Bitmap is null");
+            return;
         }
+
+        // Save bitmap to filesystem
+        final String filename = event.getFilename() + ".original.png";
+        FileOutputStream stream = null;
+        try {
+            // Open file output stream
+            stream = openFileOutput(filename, MODE_PRIVATE);
+
+            // Compress into file
+            event.getBitmap().compress(Bitmap.CompressFormat.PNG, 100, stream);
+
+            // Cleanup
+            stream.close();
+            event.getBitmap().recycle();
+        } catch (IOException e) {
+            final String message = "Could not save the image to the filesystem";
+            final Toast toast = Toast.makeText(this, message, Toast.LENGTH_SHORT);
+            toast.show();
+            Log.e(LOG_TAG, "IOException: " + e.toString());
+            return;
+        }
+
+        // Launch repost activity
+        Log.d(LOG_TAG, "Starting repost activity...");
+        Intent intent = new Intent(this, RepostActivity.class);
+        intent.putExtra(RepostActivity.PARAM_FILENAME, filename);
+        startActivity(intent);
     }
 
     @Subscribe
@@ -241,25 +257,6 @@ public class MainActivity extends ActionBarActivity {
 
     /*** Private helper methods ***/
 
-    private void createInstagramIntent(String type, String mediaPath, String caption) {
-        // Create the new Intent using the 'Send' action.
-        Intent share = new Intent(Intent.ACTION_SEND);
-
-        // Set the MIME type
-        share.setType(type);
-
-        // Create the URI from the media
-        File media = new File(mediaPath);
-        Uri uri = Uri.fromFile(media);
-
-        // Add the URI and the caption to the Intent.
-        share.putExtra(Intent.EXTRA_STREAM, uri);
-        share.putExtra(Intent.EXTRA_TEXT, caption);
-
-        // Broadcast the Intent.
-        startActivity(Intent.createChooser(share, "Share to"));
-    }
-
     /**
      * Parse the shortcode out of an Instagram share URL.
      */
@@ -270,20 +267,6 @@ public class MainActivity extends ActionBarActivity {
             return matcher.group(1);
         }
         return null;
-    }
-
-    /**
-     * Clear access token and start login activity.
-     */
-    private void logout() {
-        Log.i(LOG_TAG, "Logging out...");
-
-        // Clear access token
-        AccessTokenProvider.clearToken(this);
-
-        // Start login activity
-        Intent intent = new Intent(this, LoginActivity.class);
-        startActivity(intent);
     }
 
 }

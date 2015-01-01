@@ -8,35 +8,34 @@
 
     <TextView
         android:id="@+id/welcome_text"
-        android:text="@string/welcome_text"
+        android:text="@string/repost_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textStyle="bold"
         android:textSize="16sp" />
 
     <TextView
-        android:id="@+id/info_text"
-        android:text="@string/info_msg"
+        android:id="@+id/preview_info"
+        android:text="@string/repost_info"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/welcome_text"
         android:layout_marginTop="16dp"/>
 
-    <EditText
-        android:id="@+id/url_input"
+    <ImageView
+        android:id="@+id/media_preview"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/info_text"
-        android:layout_marginTop="32dp"
-        android:inputType="textUri"
-        android:hint="@string/place_url_hint" />
+        android:layout_below="@id/preview_info"
+        android:layout_marginTop="16dp"
+        android:adjustViewBounds="true" />
 
     <Button
-        android:id="@+id/preview_button"
+        android:id="@+id/repost_button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:text="@string/action_preview"
-        android:onClick="eventPreview" />
+        android:text="@string/action_repost"
+        android:onClick="eventRepost" />
 
 </RelativeLayout>

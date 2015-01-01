@@ -1,6 +1,6 @@
 /**
  * SimpleRepost -- A simple Instagram reposting Android app.
- * Copyright (C) 2014--2014 Danilo Bargen
+ * Copyright (C) 2014-2014 Danilo Bargen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,16 +20,22 @@ package ch.dbrgn.android.simplerepost.events;
 
 import android.graphics.Bitmap;
 
+import ch.dbrgn.android.simplerepost.models.ImageBitmap;
+
 public class DownloadedBitmapEvent {
 
-    private final Bitmap bitmap;
+    private final ImageBitmap imageBitmap;
 
-    public DownloadedBitmapEvent(Bitmap bitmap) {
-        this.bitmap = bitmap;
+    public DownloadedBitmapEvent(ImageBitmap imageBitmap) {
+        this.imageBitmap = imageBitmap;
     }
 
     public Bitmap getBitmap() {
-        return bitmap;
+        return imageBitmap.getBitmap();
+    }
+
+    public String getFilename() {
+        return imageBitmap.getFilename();
     }
 
 }

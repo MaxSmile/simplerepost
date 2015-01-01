@@ -4,6 +4,7 @@
 
     <!-- Used to access Instagram API -->
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <application
         android:allowBackup="true"
@@ -24,6 +25,13 @@
             android:name=".activities.LoginActivity"
             android:label="@string/title_activity_login"
             android:windowSoftInputMode="adjustResize|stateVisible">
+        </activity>
+
+        <activity
+            android:name=".activities.RepostActivity"
+            android:label="@string/title_activity_repost"
+            android:parentActivityName=".activities.MainActivity"
+            android:windowSoftInputMode="stateAlwaysHidden">
         </activity>
 
     </application>

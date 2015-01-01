@@ -31,13 +31,13 @@ import ch.dbrgn.android.simplerepost.activities.LoginActivity;
  * Use `AccessTokenProvider.getToken(Context context)` to get back
  * the access token string.
  */
-public class AccessTokenProvider {
+public class AuthHelper {
 
-    public static final String LOG_TAG = AccessTokenProvider.class.getName();
+    public static final String LOG_TAG = AuthHelper.class.getName();
     private static String mAccessToken;
     private static final String SHARED_PREF_NAME = "AccessToken";
 
-    private AccessTokenProvider() {
+    private AuthHelper() {
         // Don't instantiate
     }
 
@@ -57,8 +57,7 @@ public class AccessTokenProvider {
             // If login is needed, proceed to login activity
             if (mAccessToken == null) {
                 Log.i(LOG_TAG, "No access token found, launch login activity...");
-                Intent intent = new Intent(context, LoginActivity.class);
-                context.startActivity(intent);
+                launchLoginActivity(context);
                 return null;
             } else {
                 Log.i(LOG_TAG, "Access token found.");
@@ -76,6 +75,22 @@ public class AccessTokenProvider {
         SharedPreferences.Editor editor = settings.edit();
         editor.remove(SHARED_PREF_NAME);
         editor.commit();
+    }
+
+    /**
+     * Launch the login activity.
+     */
+    public static void launchLoginActivity(Context context) {
+        Intent intent = new Intent(context, LoginActivity.class);
+        context.startActivity(intent);
+    }
+
+    /**
+     * Clear the access token and launch login activity.
+     */
+    public static void logout(Context context) {
+        clearToken(context);
+        launchLoginActivity(context);
     }
 
 }

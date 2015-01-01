@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="title_activity_repost">Repost</string>
+
+    <string name="repost_title">Preview</string>
+    <string name="repost_info">This picture will be reposted:</string>
+</resources>
