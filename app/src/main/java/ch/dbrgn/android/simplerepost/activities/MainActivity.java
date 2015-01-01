@@ -1,6 +1,6 @@
 /**
  * SimpleRepost -- A simple Instagram reposting Android app.
- * Copyright (C) 2014 Danilo Bargen
+ * Copyright (C) 2014-2015 Danilo Bargen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,7 +19,6 @@ package ch.dbrgn.android.simplerepost.activities;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
@@ -42,10 +41,11 @@ import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import ch.dbrgn.android.simplerepost.AccessTokenProvider;
 import ch.dbrgn.android.simplerepost.BusProvider;
-import ch.dbrgn.android.simplerepost.Config;
 import ch.dbrgn.android.simplerepost.R;
 import ch.dbrgn.android.simplerepost.api.ApiFactory;
+import ch.dbrgn.android.simplerepost.api.MediaAccessType;
 import ch.dbrgn.android.simplerepost.events.ApiErrorEvent;
 import ch.dbrgn.android.simplerepost.events.DownloadBitmapEvent;
 import ch.dbrgn.android.simplerepost.events.DownloadErrorEvent;
@@ -53,7 +53,6 @@ import ch.dbrgn.android.simplerepost.events.DownloadedBitmapEvent;
 import ch.dbrgn.android.simplerepost.events.LoadCurrentUserEvent;
 import ch.dbrgn.android.simplerepost.events.LoadMediaPreviewEvent;
 import ch.dbrgn.android.simplerepost.events.LoadedCurrentUserEvent;
-import ch.dbrgn.android.simplerepost.api.MediaAccessType;
 import ch.dbrgn.android.simplerepost.events.LoadedMediaPreviewEvent;
 import ch.dbrgn.android.simplerepost.services.CurrentUserService;
 import ch.dbrgn.android.simplerepost.services.FileDownloadService;
@@ -67,7 +66,6 @@ public class MainActivity extends ActionBarActivity {
     public static final String LOG_TAG = MainActivity.class.getName();
 
     // Private members
-    private String mAccessToken; // Use getAccessToken()
     private ImageView mPreviewImageView;
     private ArrayList<Service> mServices = new ArrayList<>();
     private ProgressDialog mPreviewProgressDialog;
@@ -80,7 +78,7 @@ public class MainActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
 
         // Access token must be available for this activity to work
-        if (getAccessToken() != null) {
+        if (AccessTokenProvider.getToken(this) != null) {
             setContentView(R.layout.activity_main);
         }
 
@@ -108,7 +106,7 @@ public class MainActivity extends ActionBarActivity {
         bus.register(this);
 
         // Update user info
-        bus.post(new LoadCurrentUserEvent(getAccessToken()));
+        bus.post(new LoadCurrentUserEvent(AccessTokenProvider.getToken(this)));
     }
 
     @Override
@@ -170,7 +168,7 @@ public class MainActivity extends ActionBarActivity {
 
         BusProvider.getInstance().post(
                 new LoadMediaPreviewEvent(
-                        getAccessToken(), MediaAccessType.SHORTCODE, shortcode
+                        AccessTokenProvider.getToken(this), MediaAccessType.SHORTCODE, shortcode
                 )
         );
 
@@ -279,47 +277,13 @@ public class MainActivity extends ActionBarActivity {
      */
     private void logout() {
         Log.i(LOG_TAG, "Logging out...");
+
         // Clear access token
-        // TODO: Refactor this out into an auth class.
-        SharedPreferences settings = getSharedPreferences(Config.SHARED_PREFS_NAME, MODE_PRIVATE);
-        SharedPreferences.Editor editor = settings.edit();
-        editor.remove("AccessToken");
-        editor.commit();
+        AccessTokenProvider.clearToken(this);
 
         // Start login activity
-        launchLoginActivity();
-    }
-
-    /**
-     * Launch the login activity.
-     */
-    private void launchLoginActivity() {
         Intent intent = new Intent(this, LoginActivity.class);
         startActivity(intent);
     }
 
-    /**
-     * Return the access token. Fetch it from the config if necessary.
-     *
-     * If no access token is available, redirect to login activity.
-     */
-    private String getAccessToken() {
-        if (mAccessToken != null) {
-            return mAccessToken;
-        } else {
-            // Load shared preferences
-            SharedPreferences settings = getSharedPreferences(Config.SHARED_PREFS_NAME, MODE_PRIVATE);
-            mAccessToken = settings.getString("AccessToken", null);
-
-            // If login is needed, proceed to login activity
-            if (mAccessToken == null) {
-                Log.i(LOG_TAG, "No access token found, launch login activity...");
-                launchLoginActivity();
-                return null;
-            } else {
-                Log.i(LOG_TAG, "Access token found.");
-                return mAccessToken;
-            }
-        }
-    }
 }
