@@ -42,6 +42,7 @@ import java.util.regex.Pattern;
 import ch.dbrgn.android.simplerepost.AuthHelper;
 import ch.dbrgn.android.simplerepost.BusProvider;
 import ch.dbrgn.android.simplerepost.R;
+import ch.dbrgn.android.simplerepost.ToastHelper;
 import ch.dbrgn.android.simplerepost.api.ApiFactory;
 import ch.dbrgn.android.simplerepost.api.MediaAccessType;
 import ch.dbrgn.android.simplerepost.events.ApiErrorEvent;
@@ -220,9 +221,7 @@ public class MainActivity extends ActionBarActivity {
             stream.close();
             event.getBitmap().recycle();
         } catch (IOException e) {
-            final String message = "Could not save the image to the filesystem";
-            final Toast toast = Toast.makeText(this, message, Toast.LENGTH_SHORT);
-            toast.show();
+            ToastHelper.showShortToast(this, "Could not save the image to the filesystem");
             Log.e(LOG_TAG, "IOException: " + e.toString());
             return;
         }
@@ -236,17 +235,13 @@ public class MainActivity extends ActionBarActivity {
 
     @Subscribe
     public void onApiError(ApiErrorEvent event) {
-        final String message = "Something went wrong, please try again.";
-        final Toast toast = Toast.makeText(this, message, Toast.LENGTH_SHORT);
-        toast.show();
+        ToastHelper.showGenericErrorToast(this);
         Log.e(LOG_TAG, "ApiErrorEvent: " + event.getErrorMessage());
     }
 
     @Subscribe
     public void onDownloadError(DownloadErrorEvent event) {
-        final String message = "Something went wrong, please try again.";
-        final Toast toast = Toast.makeText(this, message, Toast.LENGTH_SHORT);
-        toast.show();
+        ToastHelper.showGenericErrorToast(this);
         Log.e(LOG_TAG, "DownloadErrorEvent: " + event.getErrorMessage());
     }
 

@@ -30,7 +30,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.Toast;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -39,6 +38,7 @@ import java.io.InputStream;
 
 import ch.dbrgn.android.simplerepost.AuthHelper;
 import ch.dbrgn.android.simplerepost.R;
+import ch.dbrgn.android.simplerepost.ToastHelper;
 
 
 public class RepostActivity extends ActionBarActivity {
@@ -74,13 +74,10 @@ public class RepostActivity extends ActionBarActivity {
             mPreviewImageView.setImageBitmap(bitmap);
         } else {
             // Something went wrong. Return to previous activity.
-            final String message = "Something went wrong, please try again.";
-            final Toast toast = Toast.makeText(this, message, Toast.LENGTH_SHORT);
-            toast.show();
+            ToastHelper.showGenericErrorToast(this);
             finish();
         }
     }
-
 
     /*** Menu ***/
 
@@ -155,9 +152,7 @@ public class RepostActivity extends ActionBarActivity {
             background = new BitmapDrawable(getResources(), is);
             is.close();
         } catch (FileNotFoundException e) {
-            final String message = "Could not find downloaded image on filesystem";
-            final Toast toast = Toast.makeText(this, message, Toast.LENGTH_SHORT);
-            toast.show();
+            ToastHelper.showShortToast(this, "Could not find downloaded image on filesystem");
             Log.e(LOG_TAG, "IOException: " + e.toString());
             return null;
         } catch (IOException e) {
