@@ -20,9 +20,6 @@ package ch.dbrgn.android.simplerepost.activities;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
-import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Bundle;
@@ -39,11 +36,10 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 
-import ch.dbrgn.android.simplerepost.utils.AuthHelper;
 import ch.dbrgn.android.simplerepost.R;
-import ch.dbrgn.android.simplerepost.utils.ToastHelper;
 import ch.dbrgn.android.simplerepost.models.Media;
-import ch.dbrgn.android.simplerepost.utils.TypefaceProvider;
+import ch.dbrgn.android.simplerepost.utils.AuthHelper;
+import ch.dbrgn.android.simplerepost.utils.ToastHelper;
 
 
 public class RepostActivity extends ActionBarActivity {
@@ -191,19 +187,6 @@ public class RepostActivity extends ActionBarActivity {
         watermark.setBounds(0, 0, w, h);
         watermark.draw(canvas);
         watermark.getBitmap().recycle();
-
-        // Write username onto canvas
-        /*
-        final Paint paint = new Paint();
-        final Typeface montserrat = TypefaceProvider.getTypeface(
-                this, TypefaceProvider.Font.MONTSERRAT_REGULAR);
-        paint.setColor(Color.WHITE);
-        paint.setTextAlign(Paint.Align.LEFT);
-        paint.setTextSize(50);
-        paint.setTypeface(montserrat);
-        paint.setAntiAlias(true);
-        canvas.drawText(mMedia.getUser().getUsername(), 50, 620, paint);
-        */
 
         return watermarked;
     }
