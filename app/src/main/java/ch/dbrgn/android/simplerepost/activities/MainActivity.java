@@ -28,7 +28,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
@@ -39,10 +38,10 @@ import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import ch.dbrgn.android.simplerepost.AuthHelper;
-import ch.dbrgn.android.simplerepost.BusProvider;
+import ch.dbrgn.android.simplerepost.utils.AuthHelper;
+import ch.dbrgn.android.simplerepost.utils.BusProvider;
 import ch.dbrgn.android.simplerepost.R;
-import ch.dbrgn.android.simplerepost.ToastHelper;
+import ch.dbrgn.android.simplerepost.utils.ToastHelper;
 import ch.dbrgn.android.simplerepost.api.ApiFactory;
 import ch.dbrgn.android.simplerepost.api.MediaAccessType;
 import ch.dbrgn.android.simplerepost.events.ApiErrorEvent;

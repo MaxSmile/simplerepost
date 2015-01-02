@@ -39,9 +39,9 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 
-import ch.dbrgn.android.simplerepost.AuthHelper;
+import ch.dbrgn.android.simplerepost.utils.AuthHelper;
 import ch.dbrgn.android.simplerepost.R;
-import ch.dbrgn.android.simplerepost.ToastHelper;
+import ch.dbrgn.android.simplerepost.utils.ToastHelper;
 import ch.dbrgn.android.simplerepost.models.Media;
 
 
