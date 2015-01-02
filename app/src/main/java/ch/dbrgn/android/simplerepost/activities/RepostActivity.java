@@ -19,10 +19,8 @@ package ch.dbrgn.android.simplerepost.activities;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -32,10 +30,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.Toast;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -51,7 +47,6 @@ public class RepostActivity extends ActionBarActivity {
     // Intent parameters
     public static final String PARAM_FILENAME = "Filename";
 
-    private String mFilename;
     private ImageView mPreviewImageView;
 
 
@@ -62,33 +57,17 @@ public class RepostActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_repost);
 
+        // Load filename from intent
+        final String filename = getIntent().getStringExtra(PARAM_FILENAME);
+
         // Assign views to members
         mPreviewImageView = (ImageView)findViewById(R.id.media_preview);
-    }
 
-    @Override
-    protected void onStart() {
-        super.onStart();
+        // Add watermark to image
+        final Bitmap bitmap = addWatermark(filename, R.raw.dark40);
 
-        // Load bitmap
-        final Bitmap origBitmap;
-        mFilename = getIntent().getStringExtra(PARAM_FILENAME);
-        try {
-            FileInputStream is = openFileInput(mFilename);
-            origBitmap = BitmapFactory.decodeStream(is);
-            is.close();
-        } catch (IOException e) {
-            final String message = "Could not find image on filesystem";
-            final Toast toast = Toast.makeText(this, message, Toast.LENGTH_SHORT);
-            toast.show();
-            Log.e(LOG_TAG, "IOException: " + e.toString());
-            return;
-        }
-
-        // Add watermark
-        final Bitmap watermarkedBitmap = addWatermark(origBitmap, R.raw.dark40);
-
-        mPreviewImageView.setImageBitmap(watermarkedBitmap);
+        // Show image on view
+        mPreviewImageView.setImageBitmap(bitmap);
     }
 
     /*** Menu ***/
@@ -123,7 +102,7 @@ public class RepostActivity extends ActionBarActivity {
 
     public void eventRepost(View view) {
         final String type = "image/*";
-        final String mediaPath = Environment.getExternalStorageDirectory() + mFilename;
+        final String mediaPath = Environment.getExternalStorageDirectory() + "/";
         Log.d(LOG_TAG, "Media path: " + mediaPath);
         final String captionText = "<< media caption >>";
 
@@ -154,9 +133,12 @@ public class RepostActivity extends ActionBarActivity {
 
     /**
      * Add the watermark from the specified resource file onto the
-     * specified background bitmap.
+     * specified image.
      */
-    private Bitmap addWatermark(Bitmap bitmap, int watermarkResourceFile) {
+    private Bitmap addWatermark(String filename, int watermarkResourceFile) {
+        // Read background into drawable
+        final BitmapDrawable background = new BitmapDrawable(getResources(), filename);
+
         // Read watermark into Drawable
         final InputStream is = getResources().openRawResource(watermarkResourceFile);
         final BitmapDrawable watermark = new BitmapDrawable(getResources(), is);
@@ -167,21 +149,22 @@ public class RepostActivity extends ActionBarActivity {
         }
 
         // Get dimensions
-        int w = bitmap.getWidth();
-        int h = bitmap.getHeight();
+        int w = background.getBitmap().getWidth();
+        int h = background.getBitmap().getHeight();
 
-        // Convert background to Drawable
-        Drawable background = new BitmapDrawable(getResources(), bitmap);
-
-        // Combine drawables into a single bitmap
+        // Create canvas for final output
         Bitmap watermarked = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(watermarked);
 
+        // Write background onto canvas
         background.setBounds(0, 0, w, h);
         background.draw(canvas);
+        background.getBitmap().recycle();
 
+        // write watermark onto canvas
         watermark.setBounds(0, 0, w, h);
         watermark.draw(canvas);
+        watermark.getBitmap().recycle();
 
         return watermarked;
     }
