@@ -18,7 +18,12 @@
 
 package ch.dbrgn.android.simplerepost.models;
 
-public class Media {
+import android.os.Parcel;
+import android.os.Parcelable;
+
+public class Media implements Parcelable {
+
+    /*** Fields ***/
 
     private String id;
     private String type;
@@ -27,6 +32,26 @@ public class Media {
     private User user;
     private Images images;
     private Caption caption;
+
+
+    /*** Constructors ***/
+
+    public Media(String id, String type, Long created_time, String link, User user, Images images, Caption caption) {
+        this.id = id;
+        this.type = type;
+        this.created_time = created_time;
+        this.link = link;
+        this.user = user;
+        this.images = images;
+        this.caption = caption;
+    }
+
+    public Media(Parcel in) {
+        readFromParcel(in);
+    }
+
+
+    /*** Getters ***/
 
     public String getType() {
         return type;
@@ -54,6 +79,46 @@ public class Media {
 
     public User getUser() {
         return user;
+    }
+
+
+    /*** Implement parcelable interface ***/
+
+    public static final Parcelable.Creator<Media> CREATOR = new Parcelable.Creator<Media>() {
+        @Override
+        public Media createFromParcel(Parcel source) {
+            return new Media(source);
+        }
+        @Override
+        public Media[] newArray(int size) {
+            return new Media[size];
+        }
+    };
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(id);
+        dest.writeString(type);
+        dest.writeLong(created_time);
+        dest.writeString(link);
+        dest.writeParcelable(user, flags);
+        dest.writeParcelable(images, flags);
+        dest.writeParcelable(caption, flags);
+    }
+
+    private void readFromParcel(Parcel in) {
+        id = in.readString();
+        type = in.readString();
+        created_time = in.readLong();
+        link = in.readString();
+        user = in.readParcelable(User.class.getClassLoader());
+        images = in.readParcelable(Images.class.getClassLoader());
+        caption = in.readParcelable(Caption.class.getClassLoader());
     }
 
 }

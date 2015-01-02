@@ -18,12 +18,34 @@
 
 package ch.dbrgn.android.simplerepost.models;
 
-public class Caption {
+import android.os.Parcel;
+import android.os.Parcelable;
+
+public class Caption implements Parcelable {
+
+    /*** Fields ***/
 
     private Long id;
     private Long created_time;
     private String text;
     private User from;
+
+
+    /*** Constructors ***/
+
+    public Caption(Long id, Long created_time, String text, User from) {
+        this.id = id;
+        this.created_time = created_time;
+        this.text = text;
+        this.from = from;
+    }
+
+    public Caption(Parcel in) {
+        readFromParcel(in);
+    }
+
+
+    /*** Getters ***/
 
     public Long getId() {
         return id;
@@ -39,6 +61,40 @@ public class Caption {
 
     public User getUser() {
         return from;
+    }
+
+
+    /*** Implement parcelable interface ***/
+
+    public static final Parcelable.Creator<Caption> CREATOR = new Parcelable.Creator<Caption>() {
+        @Override
+        public Caption createFromParcel(Parcel source) {
+            return new Caption(source);
+        }
+        @Override
+        public Caption[] newArray(int size) {
+            return new Caption[size];
+        }
+    };
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeLong(id);
+        dest.writeLong(created_time);
+        dest.writeString(text);
+        dest.writeParcelable(from, flags);
+    }
+
+    private void readFromParcel(Parcel in) {
+        id = in.readLong();
+        created_time = in.readLong();
+        text = in.readString();
+        from = in.readParcelable(User.class.getClassLoader());
     }
 
 }

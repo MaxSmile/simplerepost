@@ -19,24 +19,74 @@
 package ch.dbrgn.android.simplerepost.models;
 
 import android.graphics.Bitmap;
+import android.os.Parcel;
+import android.os.Parcelable;
 
-public class Image {
+public class Image implements Parcelable {
+
+    /*** Fields ***/
 
     private String url;
-    private Integer width;
-    private Integer height;
-    private Bitmap bitmap = null;
+    private int width;
+    private int height;
+
+    /*** Constructors ***/
+
+    public Image(String url, int width, int height) {
+        this.url = url;
+        this.width = width;
+        this.height = height;
+    }
+
+    public Image(Parcel in) {
+        readFromParcel(in);
+    }
+
+
+    /*** Getters ***/
 
     public String getUrl() {
         return url;
     }
 
-    public Integer getWidth() {
+    public int getWidth() {
         return width;
     }
 
-    public Integer getHeight() {
+    public int getHeight() {
         return height;
+    }
+
+
+    /*** Implement parcelable interface ***/
+
+    public static final Creator<Image> CREATOR = new Creator<Image>() {
+        @Override
+        public Image createFromParcel(Parcel source) {
+            return new Image(source);
+        }
+        @Override
+        public Image[] newArray(int size) {
+            return new Image[size];
+        }
+    };
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(url);
+        dest.writeInt(width);
+        dest.writeInt(height);
+    }
+
+    private void readFromParcel(Parcel in) {
+        url = in.readString();
+        width = in.readInt();
+        height = in.readInt();
     }
 
 }

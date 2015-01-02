@@ -18,11 +18,32 @@
 
 package ch.dbrgn.android.simplerepost.models;
 
-public class Images {
+import android.os.Parcel;
+import android.os.Parcelable;
+
+public class Images implements Parcelable {
+
+    /*** Fields ***/
 
     private Image thumbnail;
     private Image low_resolution;
     private Image standard_resolution;
+
+
+    /*** Constructors ***/
+
+    public Images(Image thumbnail, Image low_resolution, Image standard_resolution) {
+        this.thumbnail = thumbnail;
+        this.low_resolution = low_resolution;
+        this.standard_resolution = standard_resolution;
+    }
+
+    public Images(Parcel in) {
+        readFromParcel(in);
+    }
+
+
+    /*** Getters ***/
 
     public Image getThumbnail() {
         return thumbnail;
@@ -36,4 +57,35 @@ public class Images {
         return standard_resolution;
     }
 
+
+    /*** Implement parcelable interface ***/
+
+    public static final Parcelable.Creator<Images> CREATOR = new Parcelable.Creator<Images>() {
+        @Override
+        public Images createFromParcel(Parcel source) {
+            return new Images(source);
+        }
+        @Override
+        public Images[] newArray(int size) {
+            return new Images[size];
+        }
+    };
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeParcelable(thumbnail, flags);
+        dest.writeParcelable(low_resolution, flags);
+        dest.writeParcelable(standard_resolution, flags);
+    }
+
+    private void readFromParcel(Parcel in) {
+        thumbnail = in.readParcelable(Image.class.getClassLoader());
+        low_resolution = in.readParcelable(Image.class.getClassLoader());
+        standard_resolution = in.readParcelable(Image.class.getClassLoader());
+    }
 }
