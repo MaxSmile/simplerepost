@@ -30,8 +30,11 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -47,6 +50,7 @@ public class RepostActivity extends ActionBarActivity {
     // Intent parameters
     public static final String PARAM_FILENAME = "Filename";
 
+    // Views
     private ImageView mPreviewImageView;
 
 
@@ -67,7 +71,15 @@ public class RepostActivity extends ActionBarActivity {
         final Bitmap bitmap = addWatermark(filename, R.raw.dark40);
 
         // Show image on view
-        mPreviewImageView.setImageBitmap(bitmap);
+        if (bitmap != null) {
+            mPreviewImageView.setImageBitmap(bitmap);
+        } else {
+            // Something went wrong. Return to previous activity.
+            final String message = "Something went wrong, please try again.";
+            final Toast toast = Toast.makeText(this, message, Toast.LENGTH_SHORT);
+            toast.show();
+            finish();
+        }
     }
 
     /*** Menu ***/
@@ -137,7 +149,20 @@ public class RepostActivity extends ActionBarActivity {
      */
     private Bitmap addWatermark(String filename, int watermarkResourceFile) {
         // Read background into drawable
-        final BitmapDrawable background = new BitmapDrawable(getResources(), filename);
+        BitmapDrawable background = null;
+        try {
+            final InputStream is = openFileInput(filename);
+            background = new BitmapDrawable(getResources(), is);
+            is.close();
+        } catch (FileNotFoundException e) {
+            final String message = "Could not find downloaded image on filesystem";
+            final Toast toast = Toast.makeText(this, message, Toast.LENGTH_SHORT);
+            toast.show();
+            Log.e(LOG_TAG, "IOException: " + e.toString());
+            return null;
+        } catch (IOException e) {
+            Log.w(LOG_TAG, "Could not close InputStream");
+        }
 
         // Read watermark into Drawable
         final InputStream is = getResources().openRawResource(watermarkResourceFile);
