@@ -43,6 +43,7 @@ import ch.dbrgn.android.simplerepost.utils.AuthHelper;
 import ch.dbrgn.android.simplerepost.R;
 import ch.dbrgn.android.simplerepost.utils.ToastHelper;
 import ch.dbrgn.android.simplerepost.models.Media;
+import ch.dbrgn.android.simplerepost.utils.TypefaceProvider;
 
 
 public class RepostActivity extends ActionBarActivity {
@@ -193,10 +194,12 @@ public class RepostActivity extends ActionBarActivity {
 
         // Write username onto canvas
         final Paint paint = new Paint();
+        final Typeface montserrat = TypefaceProvider.getTypeface(
+                this, TypefaceProvider.Font.MONTSERRAT_REGULAR);
         paint.setColor(Color.WHITE);
         paint.setTextAlign(Paint.Align.LEFT);
         paint.setTextSize(50);
-        paint.setTypeface(Typeface.SANS_SERIF);
+        paint.setTypeface(montserrat);
         paint.setAntiAlias(true);
         canvas.drawText(mMedia.getUser().getUsername(), 50, 620, paint);
 
