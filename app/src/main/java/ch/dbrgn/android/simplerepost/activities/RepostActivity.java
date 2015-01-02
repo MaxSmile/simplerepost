@@ -71,7 +71,7 @@ public class RepostActivity extends ActionBarActivity {
         mMedia = getIntent().getParcelableExtra(PARAM_MEDIA);
 
         // Add watermark to image
-        final Bitmap bitmap = addWatermark(filename, R.raw.dark40);
+        final Bitmap bitmap = addWatermark(filename, R.raw.visitrapperswil_light);
 
         // Show image on view
         if (bitmap != null) {
@@ -193,6 +193,7 @@ public class RepostActivity extends ActionBarActivity {
         watermark.getBitmap().recycle();
 
         // Write username onto canvas
+        /*
         final Paint paint = new Paint();
         final Typeface montserrat = TypefaceProvider.getTypeface(
                 this, TypefaceProvider.Font.MONTSERRAT_REGULAR);
@@ -202,6 +203,7 @@ public class RepostActivity extends ActionBarActivity {
         paint.setTypeface(montserrat);
         paint.setAntiAlias(true);
         canvas.drawText(mMedia.getUser().getUsername(), 50, 620, paint);
+        */
 
         return watermarked;
     }

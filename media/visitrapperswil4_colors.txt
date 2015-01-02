@@ -1,0 +1,19 @@
+Export visitrapperswil3.svg from Inkscame with the following colors:
+
+Light:
+
+- Patterns -> ffffffff
+- Text -> ffffffee
+
+Dark:
+
+- Patterns -> 111111ff
+- Text -> 111111ee
+
+Filled Light:
+
+- Castle fill -> ffffffee
+
+Filled Dark:
+
+- Castle fill -> 111111ee
