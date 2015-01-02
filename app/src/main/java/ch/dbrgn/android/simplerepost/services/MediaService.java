@@ -22,14 +22,10 @@ import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
 
 import ch.dbrgn.android.simplerepost.api.MediaApi;
-import ch.dbrgn.android.simplerepost.api.UserApi;
 import ch.dbrgn.android.simplerepost.events.ApiErrorEvent;
-import ch.dbrgn.android.simplerepost.events.LoadCurrentUserEvent;
-import ch.dbrgn.android.simplerepost.events.LoadMediaPreviewEvent;
-import ch.dbrgn.android.simplerepost.events.LoadedCurrentUserEvent;
-import ch.dbrgn.android.simplerepost.events.LoadedMediaPreviewEvent;
+import ch.dbrgn.android.simplerepost.events.LoadMediaEvent;
+import ch.dbrgn.android.simplerepost.events.LoadedMediaEvent;
 import ch.dbrgn.android.simplerepost.models.MediaResponse;
-import ch.dbrgn.android.simplerepost.models.Profile;
 import retrofit.Callback;
 import retrofit.RetrofitError;
 import retrofit.client.Response;
@@ -46,15 +42,16 @@ public class MediaService implements Service {
 
     /**
      * When desired, fetch the specified media item via shortcode
-     * and post a `LoadedMediaPreview` event.
+     * and post a `LoadedMedia` event.
      */
     @Subscribe
-    public void onLoadMediaPreview(LoadMediaPreviewEvent event) {
+    public void onLoadMedia(LoadMediaEvent event) {
 
+        // The callback that will be run as soon as the HTTP Request is done
         Callback<MediaResponse> callback = new Callback<MediaResponse>() {
             @Override
             public void success(MediaResponse mediaResponse, Response response) {
-                mBus.post(new LoadedMediaPreviewEvent(mediaResponse.getMedia().getImages()));
+                mBus.post(new LoadedMediaEvent(mediaResponse.getMedia()));
             }
 
             @Override
@@ -63,6 +60,7 @@ public class MediaService implements Service {
             }
         };
 
+        // Get media by ID or by shortcode
         switch (event.getIdType()) {
             case ID:
                 mApi.getMedia(event.getIdValue(), event.getAccessToken(), callback);

@@ -19,17 +19,27 @@
 package ch.dbrgn.android.simplerepost.events;
 
 import ch.dbrgn.android.simplerepost.models.Images;
+import ch.dbrgn.android.simplerepost.models.Media;
+import ch.dbrgn.android.simplerepost.models.User;
 
-public class LoadedMediaPreviewEvent {
+public class LoadedMediaEvent {
 
-    private final Images images;
+    private final Media media;
 
-    public LoadedMediaPreviewEvent(Images images) {
-        this.images = images;
+    public LoadedMediaEvent(Media media) {
+        this.media = media;
+    }
+
+    public Media getMedia() {
+        return media;
     }
 
     public Images getImages() {
-        return images;
+        return media.getImages();
+    }
+
+    public User getUser() {
+        return media.getUser();
     }
 
 }

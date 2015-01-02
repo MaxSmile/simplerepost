@@ -34,19 +34,10 @@ import org.apache.http.impl.client.DefaultHttpClient;
 
 import java.io.InputStream;
 
-import ch.dbrgn.android.simplerepost.api.MediaApi;
-import ch.dbrgn.android.simplerepost.events.ApiErrorEvent;
 import ch.dbrgn.android.simplerepost.events.DownloadBitmapEvent;
 import ch.dbrgn.android.simplerepost.events.DownloadErrorEvent;
 import ch.dbrgn.android.simplerepost.events.DownloadedBitmapEvent;
-import ch.dbrgn.android.simplerepost.events.LoadMediaPreviewEvent;
-import ch.dbrgn.android.simplerepost.events.LoadedMediaPreviewEvent;
 import ch.dbrgn.android.simplerepost.models.ImageBitmap;
-import ch.dbrgn.android.simplerepost.models.MediaResponse;
-import retrofit.Callback;
-import retrofit.RetrofitError;
-import retrofit.client.Response;
-
 
 
 public class FileDownloadService implements Service {

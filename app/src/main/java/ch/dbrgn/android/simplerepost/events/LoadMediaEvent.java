@@ -20,13 +20,13 @@ package ch.dbrgn.android.simplerepost.events;
 
 import ch.dbrgn.android.simplerepost.api.MediaAccessType;
 
-public class LoadMediaPreviewEvent {
+public class LoadMediaEvent {
 
     private final String accessToken;
     private final MediaAccessType idType;
     private final String idValue;
 
-    public LoadMediaPreviewEvent(String accessToken, MediaAccessType idType, String idValue) {
+    public LoadMediaEvent(String accessToken, MediaAccessType idType, String idValue) {
         this.accessToken = accessToken;
         this.idType = idType;
         this.idValue = idValue;

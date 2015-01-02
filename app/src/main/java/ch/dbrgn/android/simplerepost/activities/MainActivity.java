@@ -18,7 +18,6 @@
 package ch.dbrgn.android.simplerepost.activities;
 
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
@@ -34,9 +33,7 @@ import android.widget.Toast;
 import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
 
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.IOError;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.regex.Matcher;
@@ -52,10 +49,9 @@ import ch.dbrgn.android.simplerepost.events.DownloadBitmapEvent;
 import ch.dbrgn.android.simplerepost.events.DownloadErrorEvent;
 import ch.dbrgn.android.simplerepost.events.DownloadedBitmapEvent;
 import ch.dbrgn.android.simplerepost.events.LoadCurrentUserEvent;
-import ch.dbrgn.android.simplerepost.events.LoadMediaPreviewEvent;
+import ch.dbrgn.android.simplerepost.events.LoadMediaEvent;
 import ch.dbrgn.android.simplerepost.events.LoadedCurrentUserEvent;
-import ch.dbrgn.android.simplerepost.events.LoadedMediaPreviewEvent;
-import ch.dbrgn.android.simplerepost.models.ImageBitmap;
+import ch.dbrgn.android.simplerepost.events.LoadedMediaEvent;
 import ch.dbrgn.android.simplerepost.services.CurrentUserService;
 import ch.dbrgn.android.simplerepost.services.FileDownloadService;
 import ch.dbrgn.android.simplerepost.services.MediaService;
@@ -166,7 +162,7 @@ public class MainActivity extends ActionBarActivity {
         }
 
         BusProvider.getInstance().post(
-                new LoadMediaPreviewEvent(
+                new LoadMediaEvent(
                         AuthHelper.getToken(this), MediaAccessType.SHORTCODE, shortcode
                 )
         );
@@ -190,7 +186,7 @@ public class MainActivity extends ActionBarActivity {
     }
 
     @Subscribe
-    public void onLoadedMediaPreview(LoadedMediaPreviewEvent event) {
+    public void onLoadedMedia(LoadedMediaEvent event) {
         String imageUrl = event.getImages().getStandardResolution().getUrl();
 
         Log.d(LOG_TAG, "Image URL is " + imageUrl);
@@ -212,7 +208,7 @@ public class MainActivity extends ActionBarActivity {
 
         // Save bitmap to filesystem
         final String filename = event.getFilename() + ".original.png";
-        FileOutputStream stream = null;
+        FileOutputStream stream;
         try {
             // Open file output stream
             stream = openFileOutput(filename, MODE_PRIVATE);
