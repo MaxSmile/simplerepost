@@ -53,6 +53,7 @@ import ch.dbrgn.android.simplerepost.events.LoadCurrentUserEvent;
 import ch.dbrgn.android.simplerepost.events.LoadMediaEvent;
 import ch.dbrgn.android.simplerepost.events.LoadedCurrentUserEvent;
 import ch.dbrgn.android.simplerepost.events.LoadedMediaEvent;
+import ch.dbrgn.android.simplerepost.models.Media;
 import ch.dbrgn.android.simplerepost.services.CurrentUserService;
 import ch.dbrgn.android.simplerepost.services.FileDownloadService;
 import ch.dbrgn.android.simplerepost.services.MediaService;
@@ -67,6 +68,7 @@ public class MainActivity extends ActionBarActivity {
     // Private members
     private ArrayList<Service> mServices = new ArrayList<>();
     private ProgressDialog mPreviewProgressDialog;
+    private Media mMedia;
 
 
     /*** Lifecycle methods ***/
@@ -188,8 +190,16 @@ public class MainActivity extends ActionBarActivity {
 
     @Subscribe
     public void onLoadedMedia(LoadedMediaEvent event) {
-        String imageUrl = event.getImages().getStandardResolution().getUrl();
+        mMedia = event.getMedia();
 
+        // Verify media information was sent
+        if (mMedia == null) {
+            ToastHelper.showShortToast(this, "Could not download media information from Instagram");
+            Log.e(LOG_TAG, "Media is null");
+            return;
+        }
+
+        String imageUrl = mMedia.getImages().getStandardResolution().getUrl();
         Log.d(LOG_TAG, "Image URL is " + imageUrl);
 
         BusProvider.getInstance().post(new DownloadBitmapEvent(imageUrl));
@@ -203,6 +213,7 @@ public class MainActivity extends ActionBarActivity {
         // Verify bitmap was sent
         final Bitmap bitmap = event.getBitmap();
         if (bitmap == null) {
+            ToastHelper.showShortToast(this, "Could not download media from Instagram");
             Log.e(LOG_TAG, "Bitmap is null");
             return;
         }
@@ -230,6 +241,7 @@ public class MainActivity extends ActionBarActivity {
         Log.d(LOG_TAG, "Starting repost activity...");
         Intent intent = new Intent(this, RepostActivity.class);
         intent.putExtra(RepostActivity.PARAM_FILENAME, filename);
+        intent.putExtra(RepostActivity.PARAM_MEDIA, mMedia);
         startActivity(intent);
     }
 

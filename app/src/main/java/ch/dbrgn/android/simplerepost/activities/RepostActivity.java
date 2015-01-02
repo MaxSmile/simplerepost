@@ -20,6 +20,9 @@ package ch.dbrgn.android.simplerepost.activities;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Bundle;
@@ -39,6 +42,7 @@ import java.io.InputStream;
 import ch.dbrgn.android.simplerepost.AuthHelper;
 import ch.dbrgn.android.simplerepost.R;
 import ch.dbrgn.android.simplerepost.ToastHelper;
+import ch.dbrgn.android.simplerepost.models.Media;
 
 
 public class RepostActivity extends ActionBarActivity {
@@ -48,9 +52,10 @@ public class RepostActivity extends ActionBarActivity {
 
     // Intent parameters
     public static final String PARAM_FILENAME = "Filename";
+    public static final String PARAM_MEDIA = "Media";
 
-    // Views
-    private ImageView mPreviewImageView;
+    // Private members
+    private Media mMedia;
 
 
     /*** Lifecycle methods ***/
@@ -60,17 +65,16 @@ public class RepostActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_repost);
 
-        // Load filename from intent
+        // Load intent parameters
         final String filename = getIntent().getStringExtra(PARAM_FILENAME);
-
-        // Assign views to members
-        mPreviewImageView = (ImageView)findViewById(R.id.media_preview);
+        mMedia = getIntent().getParcelableExtra(PARAM_MEDIA);
 
         // Add watermark to image
         final Bitmap bitmap = addWatermark(filename, R.raw.dark40);
 
         // Show image on view
         if (bitmap != null) {
+            ImageView mPreviewImageView = (ImageView)findViewById(R.id.media_preview);
             mPreviewImageView.setImageBitmap(bitmap);
         } else {
             // Something went wrong. Return to previous activity.
@@ -78,6 +82,7 @@ public class RepostActivity extends ActionBarActivity {
             finish();
         }
     }
+
 
     /*** Menu ***/
 
@@ -181,10 +186,19 @@ public class RepostActivity extends ActionBarActivity {
         background.draw(canvas);
         background.getBitmap().recycle();
 
-        // write watermark onto canvas
+        // Write watermark onto canvas
         watermark.setBounds(0, 0, w, h);
         watermark.draw(canvas);
         watermark.getBitmap().recycle();
+
+        // Write username onto canvas
+        final Paint paint = new Paint();
+        paint.setColor(Color.WHITE);
+        paint.setTextAlign(Paint.Align.LEFT);
+        paint.setTextSize(50);
+        paint.setTypeface(Typeface.SANS_SERIF);
+        paint.setAntiAlias(true);
+        canvas.drawText(mMedia.getUser().getUsername(), 50, 620, paint);
 
         return watermarked;
     }
