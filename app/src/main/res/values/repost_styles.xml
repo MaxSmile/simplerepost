@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="styles_array">
+        <item>visitrapperswil_dark</item>
+        <item>visitrapperswil_dark_filled</item>
+        <item>visitrapperswil_light</item>
+        <item>visitrapperswil_light_filled</item>
+    </string-array>
+</resources>

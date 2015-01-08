@@ -138,7 +138,7 @@ public class MainActivity extends ActionBarActivity {
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        if (id == R.id.action_settings) {
+        if (id == R.id.spinner_style) {
             return true;
         } else if (id == R.id.action_logout) {
             Log.i(LOG_TAG, "Logging out...");

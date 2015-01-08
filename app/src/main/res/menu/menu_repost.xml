@@ -1,0 +1,12 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="ch.dbrgn.android.simplerepost.activities.RepostActivity">
+
+    <item
+        android:id="@+id/spinner_style"
+        android:title="@string/repost_style"
+        app:showAsAction="always"
+        app:actionViewClass="android.widget.Spinner" />
+
+</menu>

@@ -17,6 +17,10 @@
  **/
 package ch.dbrgn.android.simplerepost;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
 public class Config {
     public static final String IG_CLIENT_ID = "e3badecc1d2f4f8e97a00995f92e21fb";
     public static final String IG_REDIRECT_URI = "https://dbrgn.ch/simplerepost/success/";
@@ -25,4 +29,13 @@ public class Config {
 
     public static final String SHARED_PREFS_NAME = "SimpleRepostPreferences";
 
+    public static final Map<String, Integer> REPOST_STYLES;
+    static {
+        Map<String, Integer> map = new HashMap<String, Integer>();
+        map.put("Dark", R.raw.visitrapperswil_dark);
+        map.put("Dark Filled", R.raw.visitrapperswil_dark_filled);
+        map.put("Light", R.raw.visitrapperswil_light);
+        map.put("Light Filled", R.raw.visitrapperswil_light_filled);
+        REPOST_STYLES = Collections.unmodifiableMap(map);
+    }
 }

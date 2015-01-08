@@ -20,22 +20,31 @@ package ch.dbrgn.android.simplerepost.activities;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.CheckedTextView;
 import android.widget.ImageView;
+import android.widget.Spinner;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Iterator;
+import java.util.Map;
 
+import ch.dbrgn.android.simplerepost.Config;
 import ch.dbrgn.android.simplerepost.R;
 import ch.dbrgn.android.simplerepost.models.Media;
 import ch.dbrgn.android.simplerepost.utils.AuthHelper;
@@ -53,6 +62,7 @@ public class RepostActivity extends ActionBarActivity {
 
     // Private members
     private Media mMedia;
+    private String mFilename;
 
 
     /*** Lifecycle methods ***/
@@ -63,21 +73,13 @@ public class RepostActivity extends ActionBarActivity {
         setContentView(R.layout.activity_repost);
 
         // Load intent parameters
-        final String filename = getIntent().getStringExtra(PARAM_FILENAME);
+        mFilename = getIntent().getStringExtra(PARAM_FILENAME);
         mMedia = getIntent().getParcelableExtra(PARAM_MEDIA);
 
-        // Add watermark to image
-        final Bitmap bitmap = addWatermark(filename, R.raw.visitrapperswil_light);
-
-        // Show image on view
-        if (bitmap != null) {
-            ImageView mPreviewImageView = (ImageView)findViewById(R.id.media_preview);
-            mPreviewImageView.setImageBitmap(bitmap);
-        } else {
-            // Something went wrong. Return to previous activity.
-            ToastHelper.showGenericErrorToast(this);
-            finish();
-        }
+        // Get initial repost style
+        Iterator<Integer> stylesIterator = Config.REPOST_STYLES.values().iterator();
+        int defaultStyle = stylesIterator.next();
+        updateWatermark(defaultStyle);
     }
 
 
@@ -86,9 +88,46 @@ public class RepostActivity extends ActionBarActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
+        getMenuInflater().inflate(R.menu.menu_repost, menu);
+
+        // Get spinner
+        MenuItem item = menu.findItem(R.id.spinner_style);
+        Spinner spinner = (Spinner) MenuItemCompat.getActionView(item);
+
+        // Prepare data
+        String[] spinnerArray = new String[Config.REPOST_STYLES.size()];
+        Iterator<String> styleIterator = Config.REPOST_STYLES.keySet().iterator();
+        for (int i = 0; i < Config.REPOST_STYLES.size(); i++) {
+            spinnerArray[i] = styleIterator.next();
+        }
+
+        // Set adapter
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(
+                this, android.R.layout.simple_spinner_dropdown_item, spinnerArray);
+        spinner.setAdapter(adapter);
+
+        // Handle clicks
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                // Fix text color
+                CheckedTextView textView = (CheckedTextView)view;
+                textView.setTextColor(Color.WHITE);
+
+                // Update watermark
+                int style = (int)Config.REPOST_STYLES.values().toArray()[position];
+                updateWatermark(style);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> arg0) {
+            }
+        });
+
         return true;
     }
+
+
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -98,7 +137,7 @@ public class RepostActivity extends ActionBarActivity {
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == R.id.spinner_style) {
             return true;
         } else if (id == R.id.action_logout) {
             Log.i(LOG_TAG, "Logging out...");
@@ -122,6 +161,21 @@ public class RepostActivity extends ActionBarActivity {
 
 
     /*** Private helper methods ***/
+
+    private void updateWatermark(int repostStyle) {
+        // Add watermark to image
+        final Bitmap bitmap = addWatermark(mFilename, repostStyle);
+
+        // Show image on view
+        if (bitmap != null) {
+            ImageView mPreviewImageView = (ImageView)findViewById(R.id.media_preview);
+            mPreviewImageView.setImageBitmap(bitmap);
+        } else {
+            // Something went wrong. Return to previous activity.
+            ToastHelper.showGenericErrorToast(this);
+            finish();
+        }
+    }
 
     private void createInstagramIntent(String type, String mediaPath, String caption) {
         // Create the new Intent using the 'Send' action.
