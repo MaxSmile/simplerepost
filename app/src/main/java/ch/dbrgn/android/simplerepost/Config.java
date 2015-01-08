@@ -29,6 +29,8 @@ public class Config {
 
     public static final String SHARED_PREFS_NAME = "SimpleRepostPreferences";
 
+    public static final String PICTURES_DIRECTORY_NAME = "SimpleRepost";
+
     public static final Map<String, Integer> REPOST_STYLES;
     static {
         Map<String, Integer> map = new HashMap<String, Integer>();

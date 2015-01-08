@@ -22,6 +22,7 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
+import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -36,11 +37,14 @@ import android.widget.ArrayAdapter;
 import android.widget.CheckedTextView;
 import android.widget.ImageView;
 import android.widget.Spinner;
+import android.widget.Toast;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -63,6 +67,7 @@ public class RepostActivity extends ActionBarActivity {
     // Private members
     private Media mMedia;
     private String mFilename;
+    private Bitmap mWatermarkedBitmap;
 
 
     /*** Lifecycle methods ***/
@@ -102,7 +107,7 @@ public class RepostActivity extends ActionBarActivity {
         }
 
         // Set adapter
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(
                 this, android.R.layout.simple_spinner_dropdown_item, spinnerArray);
         spinner.setAdapter(adapter);
 
@@ -151,11 +156,42 @@ public class RepostActivity extends ActionBarActivity {
     /*** UI event handlers ***/
 
     public void eventRepost(View view) {
-        final String type = "image/*";
-        final String mediaPath = Environment.getExternalStorageDirectory() + "/";
-        Log.d(LOG_TAG, "Media path: " + mediaPath);
-        final String captionText = "<< media caption >>";
+        // Check whether bitmap is available
+        if (mWatermarkedBitmap == null) {
+            Log.e(LOG_TAG, "No bitmap is available.");
+            ToastHelper.showGenericErrorToast(this);
+            return;
+        }
 
+        // Save to external storage
+        File file = saveToExternalStorage(mMedia.getId(), mWatermarkedBitmap);
+        if (file == null) {
+            // No logging / notification here, that should be handled by the save method.
+            return;
+        }
+
+        // Prepare text
+        StringBuilder builder = new StringBuilder();
+        final String separator = "****************************************************\n";
+        final String clap = "\uD83D\uDC4F";
+        builder.append("Congrats!\n");
+        builder.append(separator);
+        builder.append("★ Visit Rapperswil Feature ★\n");
+        builder.append("Picture by - @" + mMedia.getUser().getUsername() + "\n");
+        builder.append("Selected by - @\n");
+        builder.append(separator);
+        builder.append("Show ❤" + clap + " to the original post as well, thanks.\n");
+        builder.append(separator);
+        builder.append("For a chance to get featured follow @visitrapperswil ");
+        builder.append("and tag #rapperswil or #visitrapperswil.\n");
+        builder.append(separator);
+
+        // Prepare intent
+        final String type = "image/*";
+        final String mediaPath = file.getPath();
+        final String captionText = builder.toString();
+
+        // Create intent
         createInstagramIntent(type, mediaPath, captionText);
     }
 
@@ -164,17 +200,68 @@ public class RepostActivity extends ActionBarActivity {
 
     private void updateWatermark(int repostStyle) {
         // Add watermark to image
-        final Bitmap bitmap = addWatermark(mFilename, repostStyle);
+        mWatermarkedBitmap = addWatermark(mFilename, repostStyle);
 
         // Show image on view
-        if (bitmap != null) {
+        if (mWatermarkedBitmap != null) {
             ImageView mPreviewImageView = (ImageView)findViewById(R.id.media_preview);
-            mPreviewImageView.setImageBitmap(bitmap);
+            mPreviewImageView.setImageBitmap(mWatermarkedBitmap);
         } else {
             // Something went wrong. Return to previous activity.
             ToastHelper.showGenericErrorToast(this);
             finish();
         }
+    }
+
+    /**
+     * Save the specified bitmap to the external storage. The
+     * fileIdentifier parameter should be unique among all instagram
+     * posts. If the file can be written, a File object pointing
+     * to it will be returned.
+     */
+    private File saveToExternalStorage(String fileIdentifier, Bitmap bitmap) {
+        // Check whether external storage is writeable
+        final String externalStorageState = Environment.getExternalStorageState();
+        boolean isWritable = externalStorageState.equals(Environment.MEDIA_MOUNTED);
+        if (!isWritable) {
+            ToastHelper.showShortToast(this, "External storage is not writeable.");
+            return null;
+        }
+
+        // Create directory
+        final File pubDirectory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
+        final File directory = new File(pubDirectory, Config.PICTURES_DIRECTORY_NAME);
+        if (!directory.exists()) {
+            if (!directory.mkdirs()) {
+                ToastHelper.showShortToast(this, "Could not create storage directory.");
+                return null;
+            }
+        }
+
+        // Write file
+        final File file = new File(directory, fileIdentifier + ".png");
+        if (file.exists()) {
+            Log.w(LOG_TAG, "File " + file.toString() + " already exists");
+            // This can only happen if the file has been reposted before.
+            // In that case, overwrite.
+            if (!file.delete()) {
+                Log.e(LOG_TAG, "File " + file.toString() + " could not be deleted.");
+                ToastHelper.showGenericErrorToast(this);
+            } else {
+                Log.i(LOG_TAG, "Deleted file " + file);
+            }
+        }
+        try {
+            FileOutputStream os = new FileOutputStream(file);
+            bitmap.compress(Bitmap.CompressFormat.PNG, 90, os);
+            os.flush();
+            os.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+            ToastHelper.showGenericErrorToast(this);
+        }
+
+        return file;
     }
 
     private void createInstagramIntent(String type, String mediaPath, String caption) {
