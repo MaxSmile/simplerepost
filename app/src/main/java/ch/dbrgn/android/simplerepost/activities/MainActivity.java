@@ -263,9 +263,10 @@ public class MainActivity extends ActionBarActivity {
      * Parse the shortcode out of an Instagram share URL.
      */
     private String parseShortcodeUrl(String text) {
-        Pattern pattern = Pattern.compile("^(?:https?://)?instagram.com/p/([a-zA-Z0-9]+)/?.*");
+        Pattern pattern = Pattern.compile("^(?:https?://)?instagram.com/p/([a-zA-Z0-9\\-_]+)/?.*");
         Matcher matcher = pattern.matcher(text);
         if (matcher.matches()) {
+            Log.d(LOG_TAG, "Shortcode is " +  matcher.group(1));
             return matcher.group(1);
         }
         return null;
