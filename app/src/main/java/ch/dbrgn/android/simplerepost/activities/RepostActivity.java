@@ -51,6 +51,7 @@ import java.util.Map;
 import ch.dbrgn.android.simplerepost.Config;
 import ch.dbrgn.android.simplerepost.R;
 import ch.dbrgn.android.simplerepost.models.Media;
+import ch.dbrgn.android.simplerepost.models.User;
 import ch.dbrgn.android.simplerepost.utils.AuthHelper;
 import ch.dbrgn.android.simplerepost.utils.ToastHelper;
 
@@ -63,11 +64,13 @@ public class RepostActivity extends ActionBarActivity {
     // Intent parameters
     public static final String PARAM_FILENAME = "Filename";
     public static final String PARAM_MEDIA = "Media";
+    public static final String PARAM_USER = "User";
 
     // Private members
     private Media mMedia;
     private String mFilename;
     private Bitmap mWatermarkedBitmap;
+    private User mCurrentUser;
 
 
     /*** Lifecycle methods ***/
@@ -78,8 +81,10 @@ public class RepostActivity extends ActionBarActivity {
         setContentView(R.layout.activity_repost);
 
         // Load intent parameters
-        mFilename = getIntent().getStringExtra(PARAM_FILENAME);
-        mMedia = getIntent().getParcelableExtra(PARAM_MEDIA);
+        final Intent intent = getIntent();
+        mFilename = intent.getStringExtra(PARAM_FILENAME);
+        mMedia = intent.getParcelableExtra(PARAM_MEDIA);
+        mCurrentUser = intent.getParcelableExtra(PARAM_USER);
 
         // Get initial repost style
         Iterator<Integer> stylesIterator = Config.REPOST_STYLES.values().iterator();
@@ -125,8 +130,7 @@ public class RepostActivity extends ActionBarActivity {
             }
 
             @Override
-            public void onNothingSelected(AdapterView<?> arg0) {
-            }
+            public void onNothingSelected(AdapterView<?> arg0) { } // Ignore
         });
 
         return true;
@@ -176,7 +180,7 @@ public class RepostActivity extends ActionBarActivity {
         builder.append("Congrats!\n.\n");
         builder.append("★ Visit Rapperswil Feature ★\n");
         builder.append("Picture by - @" + mMedia.getUser().getUsername() + "\n");
-        builder.append("Selected by - @\n.\n");
+        builder.append("Selected by - @" + mCurrentUser.getUsername() + "\n.\n");
         builder.append("Show ❤" + clap + " to the original post as well, thanks.\n.\n");
         builder.append("For a chance to get featured follow @visitrapperswil ");
         builder.append("and tag #rapperswil or #visitrapperswil.");

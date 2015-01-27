@@ -39,6 +39,7 @@ import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import ch.dbrgn.android.simplerepost.models.User;
 import ch.dbrgn.android.simplerepost.utils.AuthHelper;
 import ch.dbrgn.android.simplerepost.utils.BusProvider;
 import ch.dbrgn.android.simplerepost.R;
@@ -70,14 +71,11 @@ public class MainActivity extends ActionBarActivity {
     private ArrayList<Service> mServices = new ArrayList<>();
     private ProgressDialog mPreviewProgressDialog;
     private Media mMedia;
+    private User mCurrentUser;
 
     // UI views
     private EditText mUrlInputView;
     private Button mPreviewButton;
-
-    public MainActivity() {
-
-    }
 
 
     /*** Lifecycle methods ***/
@@ -217,7 +215,9 @@ public class MainActivity extends ActionBarActivity {
 
     @Subscribe
     public void onLoadedCurrentUser(LoadedCurrentUserEvent event) {
-        final String username = event.getUser().getFullNameOrUsername();
+        mCurrentUser = event.getUser();
+
+        final String username = mCurrentUser.getFullNameOrUsername();
         final String welcomeText = getString(R.string.welcome_text_personalized, username);
 
         TextView welcomeTextView = (TextView)findViewById(R.id.welcome_text);
@@ -278,6 +278,7 @@ public class MainActivity extends ActionBarActivity {
         Intent intent = new Intent(this, RepostActivity.class);
         intent.putExtra(RepostActivity.PARAM_FILENAME, filename);
         intent.putExtra(RepostActivity.PARAM_MEDIA, mMedia);
+        intent.putExtra(RepostActivity.PARAM_USER, mCurrentUser);
         startActivity(intent);
     }
 
