@@ -37,6 +37,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:text="@string/action_preview"
+        android:enabled="false"
         android:onClick="eventPreview" />
 
 </RelativeLayout>

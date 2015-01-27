@@ -26,6 +26,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
@@ -41,6 +42,7 @@ import java.util.regex.Pattern;
 import ch.dbrgn.android.simplerepost.utils.AuthHelper;
 import ch.dbrgn.android.simplerepost.utils.BusProvider;
 import ch.dbrgn.android.simplerepost.R;
+import ch.dbrgn.android.simplerepost.utils.TextValidator;
 import ch.dbrgn.android.simplerepost.utils.ToastHelper;
 import ch.dbrgn.android.simplerepost.api.ApiFactory;
 import ch.dbrgn.android.simplerepost.api.MediaAccessType;
@@ -69,6 +71,14 @@ public class MainActivity extends ActionBarActivity {
     private ProgressDialog mPreviewProgressDialog;
     private Media mMedia;
 
+    // UI views
+    private EditText mUrlInputView;
+    private Button mPreviewButton;
+
+    public MainActivity() {
+
+    }
+
 
     /*** Lifecycle methods ***/
 
@@ -86,6 +96,31 @@ public class MainActivity extends ActionBarActivity {
         mServices.add(new CurrentUserService(ApiFactory.getUserApi(), BusProvider.getInstance()));
         mServices.add(new MediaService(ApiFactory.getMediaApi(), BusProvider.getInstance()));
         mServices.add(new FileDownloadService(BusProvider.getInstance()));
+
+        // Initialize UI views
+        mUrlInputView = (EditText)findViewById(R.id.url_input);
+        mPreviewButton = (Button)findViewById(R.id.preview_button);
+
+        // Add validator to EditText box
+        mUrlInputView.addTextChangedListener(new TextValidator(mUrlInputView) {
+            @Override
+            public void validate(TextView textView, String text) {
+                if (text.isEmpty()) {
+                    mPreviewButton.setEnabled(false);
+                    mUrlInputView.setError(null);
+                } else {
+                    if (parseShortcodeUrl(text) == null) {
+                        // Invalid input
+                        mUrlInputView.setError("This must be an Instagram URL in the form " +
+                                "\"https://instagram.com/p/ABC123\".");
+                        mPreviewButton.setEnabled(false);
+                    } else {
+                        mUrlInputView.setError(null);
+                        mPreviewButton.setEnabled(true);
+                    }
+                }
+            }
+        });
     }
 
     @Override
@@ -154,8 +189,7 @@ public class MainActivity extends ActionBarActivity {
     public void eventPreview(View view) {
         // TODO: Input validation
 
-        EditText urlInputView = (EditText)findViewById(R.id.url_input);
-        final String text = urlInputView.getText().toString();
+        final String text = mUrlInputView.getText().toString();
 
         final String shortcode = parseShortcodeUrl(text);
         if (shortcode == null || shortcode.equals("")) {
