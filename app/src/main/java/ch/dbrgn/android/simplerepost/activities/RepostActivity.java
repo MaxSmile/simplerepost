@@ -172,19 +172,14 @@ public class RepostActivity extends ActionBarActivity {
 
         // Prepare text
         StringBuilder builder = new StringBuilder();
-        final String separator = "****************************************************\n";
         final String clap = "\uD83D\uDC4F";
-        builder.append("Congrats!\n");
-        builder.append(separator);
+        builder.append("Congrats!\n.\n");
         builder.append("★ Visit Rapperswil Feature ★\n");
         builder.append("Picture by - @" + mMedia.getUser().getUsername() + "\n");
-        builder.append("Selected by - @\n");
-        builder.append(separator);
-        builder.append("Show ❤" + clap + " to the original post as well, thanks.\n");
-        builder.append(separator);
+        builder.append("Selected by - @\n.\n");
+        builder.append("Show ❤" + clap + " to the original post as well, thanks.\n.\n");
         builder.append("For a chance to get featured follow @visitrapperswil ");
-        builder.append("and tag #rapperswil or #visitrapperswil.\n");
-        builder.append(separator);
+        builder.append("and tag #rapperswil or #visitrapperswil.");
 
         // Prepare intent
         final String type = "image/*";
