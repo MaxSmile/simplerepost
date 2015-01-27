@@ -129,6 +129,9 @@ public class MainActivity extends ActionBarActivity {
 
         final Bus bus = BusProvider.getInstance();
 
+        // Clear input box
+        mUrlInputView.setText("");
+
         // Register services on the bus
         for (Service service : mServices) {
             bus.register(service);
