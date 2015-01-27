@@ -18,6 +18,7 @@
 
 package ch.dbrgn.android.simplerepost.utils;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -46,19 +47,19 @@ public class AuthHelper {
      * Retrieve the access token.
      * If no access token is found, the login activity is launched.
      */
-    public static String getToken(Context context) {
+    public static String getToken(Activity activity) {
         if (mAccessToken != null) {
             return mAccessToken;
         } else {
             // Load shared preferences
-            SharedPreferences settings = context.getSharedPreferences(
+            SharedPreferences settings = activity.getSharedPreferences(
                     Config.SHARED_PREFS_NAME, Context.MODE_PRIVATE);
             mAccessToken = settings.getString(SHARED_PREF_NAME, null);
 
             // If login is needed, proceed to login activity
             if (mAccessToken == null) {
                 Log.i(LOG_TAG, "No access token found, launch login activity...");
-                launchLoginActivity(context);
+                launchLoginActivity(activity);
                 return null;
             } else {
                 Log.i(LOG_TAG, "Access token found.");
@@ -81,17 +82,18 @@ public class AuthHelper {
     /**
      * Launch the login activity.
      */
-    public static void launchLoginActivity(Context context) {
-        Intent intent = new Intent(context, LoginActivity.class);
-        context.startActivity(intent);
+    public static void launchLoginActivity(Activity activity) {
+        Intent intent = new Intent(activity, LoginActivity.class);
+        activity.startActivity(intent);
+        activity.finish();
     }
 
     /**
      * Clear the access token and launch login activity.
      */
-    public static void logout(Context context) {
-        clearToken(context);
-        launchLoginActivity(context);
+    public static void logout(Activity activity) {
+        clearToken(activity);
+        launchLoginActivity(activity);
     }
 
 }
