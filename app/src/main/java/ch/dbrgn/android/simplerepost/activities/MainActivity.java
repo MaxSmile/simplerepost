@@ -86,7 +86,9 @@ public class MainActivity extends ActionBarActivity {
 
         // Access token must be available for this activity to work
         // This is needed because this is the main activity
-        if (AuthHelper.getToken(this) != null) {
+        if (AuthHelper.getToken(this) == null) {
+            return;
+        } else {
             setContentView(R.layout.activity_main);
         }
 
@@ -125,6 +127,13 @@ public class MainActivity extends ActionBarActivity {
     public void onResume() {
         super.onResume();
 
+        // Access token must be available for this activity to work
+        // This is needed because this is the main activity.
+        // TODO: This code is duplicated (see onCreate). Clean up.
+        if (AuthHelper.getToken(this) == null) {
+            return;
+        }
+
         final Bus bus = BusProvider.getInstance();
 
         // Clear input box
@@ -145,6 +154,13 @@ public class MainActivity extends ActionBarActivity {
     @Override
     public void onPause() {
         super.onPause();
+
+        // Access token must be available for this activity to work
+        // This is needed because this is the main activity.
+        // TODO: This code is duplicated (see onCreate). Clean up.
+        if (AuthHelper.getToken(this) == null) {
+            return;
+        }
 
         final Bus bus = BusProvider.getInstance();
 
