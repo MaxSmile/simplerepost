@@ -314,12 +314,18 @@ public class MainActivity extends ActionBarActivity {
     public void onApiError(ApiErrorEvent event) {
         ToastHelper.showGenericErrorToast(this);
         Log.e(LOG_TAG, "ApiErrorEvent: " + event.getErrorMessage());
+
+        // Hide progress dialog
+        mPreviewProgressDialog.dismiss();
     }
 
     @Subscribe
     public void onDownloadError(DownloadErrorEvent event) {
         ToastHelper.showGenericErrorToast(this);
         Log.e(LOG_TAG, "DownloadErrorEvent: " + event.getErrorMessage());
+
+        // Hide progress dialog
+        mPreviewProgressDialog.dismiss();
     }
 
 
