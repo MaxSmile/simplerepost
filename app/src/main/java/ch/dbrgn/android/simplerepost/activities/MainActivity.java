@@ -248,6 +248,18 @@ public class MainActivity extends ActionBarActivity {
         if (mMedia == null) {
             ToastHelper.showShortToast(this, "Could not download media information from Instagram");
             Log.e(LOG_TAG, "Media is null");
+
+            // Hide progress dialog
+            mPreviewProgressDialog.dismiss();
+
+            return;
+        } else if (mMedia.getType().equals("video")) {
+            ToastHelper.showLongToast(this, "Reposting videos is currently not supported");
+            Log.w(LOG_TAG, "User tried to repost a video");
+
+            // Hide progress dialog
+            mPreviewProgressDialog.dismiss();
+
             return;
         }
 
