@@ -1,0 +1,22 @@
+Changelog
+=========
+
+Possible log types are ``[add]``, ``[bug]``, ``[change]`` and ``[info]``.
+
+
+---
+
+v0.9.5 (unreleased)
+
+- [add] Handle videos (#6)
+
+v0.9.4 (2015-01-28)
+
+- [bug] Fixed NullPointerException in MainActivity
+
+v0.9.3 (2015-01-28)
+
+- [add] Don't hide buttons behind keyboard (#1)
+- [add] Put current user name in caption (#2)
+- [add] Clear URL input on resume (#4)
+- [add] URL input validation (#9)
