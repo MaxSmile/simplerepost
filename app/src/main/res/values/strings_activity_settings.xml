@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="title_activity_settings">Settings</string>
+
+    <string name="settings_caption_default_template">Congrats! Repost from {author} by {reposter} with SimpleRepost app for Android.</string>
+</resources>

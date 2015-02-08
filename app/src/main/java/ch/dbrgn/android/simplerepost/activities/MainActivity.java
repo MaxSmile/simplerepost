@@ -195,6 +195,10 @@ public class MainActivity extends ActionBarActivity {
         } else if (id == R.id.action_logout) {
             Log.i(LOG_TAG, "Logging out...");
             AuthHelper.logout(this);
+        } else if (id == R.id.action_settings) {
+            Log.i(LOG_TAG, "Launching settings activity");
+            Intent intent = new Intent(this, SettingsActivity.class);
+            startActivity(intent);
         }
 
         return super.onOptionsItemSelected(item);
