@@ -33,7 +33,7 @@ public class Config {
 
     public static final Map<String, Integer> REPOST_STYLES;
     static {
-        Map<String, Integer> map = new HashMap<String, Integer>();
+        Map<String, Integer> map = new HashMap<>();
         map.put("Dark", R.raw.visitrapperswil_dark);
         map.put("Dark Filled", R.raw.visitrapperswil_dark_filled);
         map.put("Light", R.raw.visitrapperswil_light);

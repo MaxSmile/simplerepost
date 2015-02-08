@@ -18,11 +18,11 @@
 package ch.dbrgn.android.simplerepost.activities;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
-import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -37,16 +37,13 @@ import android.widget.ArrayAdapter;
 import android.widget.CheckedTextView;
 import android.widget.ImageView;
 import android.widget.Spinner;
-import android.widget.Toast;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.Iterator;
-import java.util.Map;
 
 import ch.dbrgn.android.simplerepost.Config;
 import ch.dbrgn.android.simplerepost.R;
@@ -65,6 +62,9 @@ public class RepostActivity extends ActionBarActivity {
     public static final String PARAM_FILENAME = "Filename";
     public static final String PARAM_MEDIA = "Media";
     public static final String PARAM_USER = "User";
+
+    // Shared preference keys
+    private static final String PREF_WATERMARK_STYLE = "WatermarkStyle";
 
     // Private members
     private Media mMedia;
@@ -85,11 +85,6 @@ public class RepostActivity extends ActionBarActivity {
         mFilename = intent.getStringExtra(PARAM_FILENAME);
         mMedia = intent.getParcelableExtra(PARAM_MEDIA);
         mCurrentUser = intent.getParcelableExtra(PARAM_USER);
-
-        // Get initial repost style
-        Iterator<Integer> stylesIterator = Config.REPOST_STYLES.values().iterator();
-        int defaultStyle = stylesIterator.next();
-        updateWatermark(defaultStyle);
     }
 
 
@@ -116,26 +111,23 @@ public class RepostActivity extends ActionBarActivity {
                 this, android.R.layout.simple_spinner_dropdown_item, spinnerArray);
         spinner.setAdapter(adapter);
 
+        // Load style from shared preferences
+        int initialStyle = loadWatermarkStyle(0);
+
+        // Validate stored style to prevent array IndexOutOfBoundsException
+        if (initialStyle < 0 || initialStyle >= Config.REPOST_STYLES.size()) {
+            Log.i(LOG_TAG, "Invalid stored watermark style. Setting it to \"0\".");
+            initialStyle = 0;
+        }
+
+        // Set default style
+        spinner.setSelection(initialStyle);
+
         // Handle clicks
-        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                // Fix text color
-                CheckedTextView textView = (CheckedTextView)view;
-                textView.setTextColor(Color.WHITE);
-
-                // Update watermark
-                int style = (int)Config.REPOST_STYLES.values().toArray()[position];
-                updateWatermark(style);
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> arg0) { } // Ignore
-        });
+        spinner.setOnItemSelectedListener(onWatermarkStyleSelected());
 
         return true;
     }
-
 
 
     @Override
@@ -156,9 +148,66 @@ public class RepostActivity extends ActionBarActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    private AdapterView.OnItemSelectedListener onWatermarkStyleSelected() {
+        return new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                // Fix text color
+                CheckedTextView textView = (CheckedTextView)view;
+                textView.setTextColor(Color.WHITE);
+
+                // Update watermark
+                final int style = (int) Config.REPOST_STYLES.values().toArray()[position];
+                updateWatermark(style);
+
+                // Store choice in shared preferences
+                storeWatermarkStyle(position);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> arg0) { } // Ignore
+        };
+    }
+
+    /**
+     * Store watermark style in shared preferences file.
+     */
+    private void storeWatermarkStyle(int position) {
+        SharedPreferences settings = getSharedPreferences(Config.SHARED_PREFS_NAME, MODE_PRIVATE);
+        SharedPreferences.Editor editor = settings.edit();
+        editor.putInt(PREF_WATERMARK_STYLE, position);
+        Log.i(LOG_TAG, "Storing watermark style \"" + position + "\" to shared preferences");
+        editor.apply();
+    }
+
+    /**
+     * Load watermark style from shared preferences.
+     *
+     * If no stored style can be found, the specifieddefault value will be returned.
+     *
+     * If stored style exists but cannot be read as integer, the key will be cleared
+     * and the default value will be returned.
+     */
+    private int loadWatermarkStyle(int defaultValue) {
+        SharedPreferences settings = getSharedPreferences(Config.SHARED_PREFS_NAME, MODE_PRIVATE);
+        try {
+            final int loadedStyle = settings.getInt(PREF_WATERMARK_STYLE, defaultValue);
+            Log.i(LOG_TAG, "Loaded watermark style \"" + loadedStyle + "\" from shared preferences");
+            return loadedStyle;
+        } catch (ClassCastException e) {
+            Log.w(LOG_TAG, "Could not load watermark style as int from shared preferences");
+            SharedPreferences.Editor editor = settings.edit();
+            editor.remove(PREF_WATERMARK_STYLE);
+            editor.apply();
+            Log.i(LOG_TAG, "Cleared waterma1rk style from shared preferences");
+            return defaultValue;
+        }
+    }
+
 
     /*** UI event handlers ***/
 
+    @SuppressWarnings({"StringBufferReplaceableByString", "StringConcatenationInsideStringBufferAppend"})
     public void eventRepost(View view) {
         // Check whether bitmap is available
         if (mWatermarkedBitmap == null) {
