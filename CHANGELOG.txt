@@ -10,6 +10,7 @@ v0.9.5 (unreleased)
 
 - [add] Handle videos (#6)
 - [add] Store previous watermark choice (#11)
+- [bug] Fixed logout functionality (#10)
 
 v0.9.4 (2015-01-28)
 
